@@ -1,5 +1,9 @@
 package gapp.ulg.game.board;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinTask;
+
 /** <b>Non modificare le intestazioni dei metodi e non aggiungere metodi.</b>
  * <br>
  * Un oggetto Player rappresenta un giocatore. Può essere un giocatore capace di
@@ -52,15 +56,57 @@ public interface Player<P> {
      * sua copia.
      * <br>
      * <b>Se il gioco mette un limite sul tempo per effettuare una mossa
-     * {@link GameRuler.Mechanics#time}, il metodo fa di tutto per rispettarlo. Può
-     * usare thread addizionali per calcolare la mossa, però quando ritorna tutti
-     * i thread usati sono stati liberati o terminati, cioè se non sono terminati
-     * non ci sono computazioni residue in esecuzione dovute a questo metodo su tali
-     * thread.</b>
+     * {@link GameRuler.Mechanics#time}, il metodo fa di tutto per rispettarlo. PuÃ²
+     * usare thread addizionali per calcolare la mossa, perÃ² quando ritorna tutti
+     * i thread usati (esclusi quelli permessi, vedi {@link Player#threads}) sono
+     * stati liberati o terminati, cioÃ¨ se non sono terminati non ci sono computazioni
+     * residue in esecuzione dovute a questo metodo su tali thread.
+     * <br>
+     * Se il thread in cui Ã¨ invocato il metodo Ã¨ interrotto, il metodo termina
+     * immediatamente tutte le computazioni, termina i thread addizionali, o se non
+     * puÃ² interrompe le computazioni dovute a questo metodo, e ritorna null.
+     * <br>
+     * Il metodo non puÃ² usare {@link ForkJoinPool#commonPool()}, puÃ² eventualmente
+     * usare un pool del framework {@link ForkJoinTask ForkJoin} solo se
+     * esplicitamente autorizzato da {@link Player#threads}.</b>
      * @return la mossa del giocatore
-     * @throws IllegalStateException se non c'è un gioco impostato, c'è ma è terminato
-     * oppure non è il turno di questo giocatore (l'indice di turnazione di questo
-     * giocatore è determinato alla prima mossa e quindi il controllo sul turno è
+     * @throws IllegalStateException se non c'Ã¨ un gioco impostato, c'Ã¨ ma Ã¨ terminato
+     * oppure non Ã¨ il turno di questo giocatore (l'indice di turnazione di questo
+     * giocatore Ã¨ determinato alla prima mossa e quindi il controllo sul turno Ã¨
      * dalla seconda mossa in poi). */
     Move<P> getMove();
+
+    /** Comunica al giocatore il massimo numero di thread addizionali, l'eventuale
+     * pool per il framework {@link ForkJoinTask ForkJoin} e l'eventuale esecutore
+     * per l'esecuzione in background. I thread addizionali sono i thread che
+     * {@link Player#getMove} puÃ² creare ed usare, esclusi quelli dell'eventuale pool
+     * {@code fjp} e l'eventuale esecutore {@code bgExec}. Se {@code fpj} non Ã¨ null,
+     * puÃ² usare tale pool con il framework {@link ForkJoinTask ForkJoin}. Ma non puÃ²
+     * in nessun caso usare il {@link ForkJoinPool#commonPool() Common Pool}. Se
+     * {@code bgExec} non Ã¨ null, {@link Player#getMove} puÃ² usare l'esecutore per
+     * eseguire task in background, cioÃ¨ anche dopo che l'invocazione del metodo
+     * {@link Player#getMove} ritorna per elaborare durante le mosse degli avversari.
+     * PiÃ¹ precisamente se T Ã¨ il valore di {@code maxTh} allora durante
+     * un'invocazione di {@link Player#getMove} puÃ² creare ed usare al massimo T
+     * threads, oltre a quelli di {@code fjp}, se non Ã¨ null, e l'esecutore
+     * {@code bgExec}, se non null. Quando l'invocazione ritorna tutti i thread
+     * addizionali devono essere terminati e non ci devono essere computazioni attive
+     * nel {@code fjp}. Se {@code bgExec} non Ã¨ null, possono rimanere task attivi
+     * in tale esecutore.
+     * <br>
+     * Se {@code maxTh} Ã¨ < 0, significa che non ci sono limiti sul numero di thread
+     * addizionali.
+     * <br>
+     * L'implementazione di default non fa nulla. Se un {@link Player} ha bisogno di
+     * usare thread ulteriori, <b>deve ridefinire tale metodo</b>, altrimenti la
+     * comunicazione circa i limiti imposti andrÃ  persa perÃ² i limiti saranno fatti
+     * valere comunque.
+     * <br>
+     * In assenza di comunicazione, cioÃ¨ questo metodo non Ã¨ mai invocato, si presume
+     * che non ci sia alcun limite e il giocatore puÃ² usare tutti i thread che vuole,
+     * come vuole compreso il {@link ForkJoinPool#commonPool() Common Pool}.
+     * @param maxTh  massimo numero di thread addizionali
+     * @param fjp  pool per il framework {@link ForkJoinTask ForkJoin}, o null
+     * @param bgExec  per l'esecuzione in background, puÃ² essere null */
+    default void threads(int maxTh, ForkJoinPool fjp, ExecutorService bgExec) { }
 }
