@@ -175,16 +175,9 @@ public class Probe { //Questo sistema attualmente funziona solo per Othello e Mn
         }
 
         ExecutorService executor = Executors.newCachedThreadPool();
-        Set<Future<Map<Set<S>, Integer>>> listFut = new HashSet<>();
         for(S s : start) {
-            Operation callable = new Operation(s);
-            Future<Map<Set<S>, Integer>> future = executor.submit(callable);
-            listFut.add(future);
-        }
-
-        for(Future<Map<Set<S>, Integer>> future : listFut) {
             try {
-                nxtS.putAll(future.get());
+                nxtS.putAll((Map<? extends Set<S>, ? extends Integer>) executor.submit(new Operation(s)).get());
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
             }

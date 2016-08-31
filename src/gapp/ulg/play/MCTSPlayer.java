@@ -111,9 +111,7 @@ public class MCTSPlayer<P> implements Player<P> { //Factory non completata, test
                 Callable<Integer> callable = new Operation(m, gameRul.copy());
                 try {
                     mNext.put(m, service.submit(callable).get());
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } catch (ExecutionException e) {
+                } catch (InterruptedException | ExecutionException e) {
                     e.printStackTrace();
                 }
             }
