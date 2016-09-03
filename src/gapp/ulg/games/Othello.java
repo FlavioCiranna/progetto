@@ -215,9 +215,10 @@ public class Othello implements GameRuler<PieceModel<Species>> {
      * {@link Action.Kind#ADD} seguita da una {@link Action} di tipo
      * {@link Action.Kind#SWAP}. */
     @Override
-    public Set<Move<PieceModel<Species>>> validMoves() { //Prima o poi dovrò trovare la forza di riscriverlo in multithreading...
+    public Set<Move<PieceModel<Species>>> validMoves() {
         if(cT == 0) { throw new IllegalStateException("Il gioco è già terminato"); }
         Set<Move<PieceModel<Species>>> moveSet = new HashSet<>(); //Insieme risultato anche se vuoto verrà ritornato
+
         List<Board.Dir> directions = Arrays.asList(Board.Dir.UP, Board.Dir.UP_L, Board.Dir.LEFT,
                 Board.Dir.DOWN_L, Board.Dir.DOWN, Board.Dir.DOWN_R, Board.Dir.RIGHT, Board.Dir.UP_R);
         PieceModel<Species> pA = new PieceModel<>(Species.DISC, "bianco"), pP = new PieceModel<>(Species.DISC, "nero");
@@ -304,6 +305,7 @@ public class Othello implements GameRuler<PieceModel<Species>> {
             Board<PieceModel<Species>> bOth = new BoardOct<>(size, size);
             for(Map.Entry<Pos, PieceModel<Species>> entry : s.newMap().entrySet()) { bOth.put(entry.getValue(), entry.getKey()); }
             Othello nxt = new Othello(0,size,player1,player2,bOth,s.turn,forced,gS);
+            List<ForkJoinTask<Map<Move<PieceModel<Species>>, Situation<PieceModel<Species>>>>> tasks = new ArrayList<>();
 
             class Operation implements Callable{
                 private Move<PieceModel<Species>> mov;
@@ -314,26 +316,24 @@ public class Othello implements GameRuler<PieceModel<Species>> {
                 }
 
                 @Override
-                public Map<Move<PieceModel<Species>>, Situation<PieceModel<Species>>> call() throws Exception {
+                public Map<Move<PieceModel<Species>>, Situation<PieceModel<Species>>> call(){
                     Map<Move<PieceModel<Species>>, Situation<PieceModel<Species>>> res = new HashMap<>(); //Risultato
-                    othello.move(mov); Map<Pos, PieceModel<Species>> mapSit = new HashMap<>(); //Mappa dei pezzi per la situazione successiva con mossa mov
+
+                    othello.move(mov);
+                    Map<Pos, PieceModel<Species>> mapSit = new HashMap<>(); //Mappa dei pezzi per la situazione successiva con mossa mov
                     for(Pos p : othello.getBoard().get()) { mapSit.put(p, othello.getBoard().get(p)); } //Aggiorno mapSit alla situazione attuale
                     res.put(mov, new Situation<>(mapSit, othello.turn()));
                     return res;
                 }
             }
 
-            ExecutorService executor = Executors.newCachedThreadPool();
             for(Move<PieceModel<Species>> m : nxt.validMoves()) {
-                if(!m.getKind().equals(Move.Kind.RESIGN)){
-                    try {
-                        nextMoves.putAll((Map<? extends Move<PieceModel<Species>>, ? extends Situation<PieceModel<Species>>>) executor.submit(new Operation(m)).get());
-                    } catch (InterruptedException | ExecutionException e) {
-                        e.printStackTrace();
-                    }
-                }
+                if (!m.getKind().equals(Move.Kind.RESIGN)) { tasks.add(ForkJoinTask.adapt(new Operation(m))); }
             }
-            executor.shutdown();
+
+            for(ForkJoinTask<Map<Move<PieceModel<Species>>, Situation<PieceModel<Species>>>> t : ForkJoinTask.invokeAll(tasks)) {
+                nextMoves.putAll(t.join());
+            }
 
             return nextMoves;
         };
