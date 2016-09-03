@@ -49,8 +49,8 @@ public class Othello implements GameRuler<PieceModel<Species>> {
 
     private long time;
     private int size;
-    private Player<PieceModel<Species>> player1;
-    private Player<PieceModel<Species>> player2;
+    private String player1;
+    private String player2;
     private Board<PieceModel<Species>> board;
     private int cT; //Turno corrente
     private int forced; //In caso di resa o mossa invalida forza la vittoria di un player senza considerare il punteggio
@@ -78,7 +78,7 @@ public class Othello implements GameRuler<PieceModel<Species>> {
         if(!Arrays.asList(6, 8, 10, 12).contains(size)) { throw new IllegalArgumentException("La dimensione della board non rientra nei valori accettati"); }
         this.time = time;
         this.size = size;
-        this.player1 = new RandPlayer<>(p1); this.player2 = new RandPlayer<>(p2); //Creo i players
+        this.player1 = p1; this.player2 = p2; //Assegno il nome dei players
         this.board = new BoardOct<>(size, size); //Inizializzo la board sullo stato iniziare (BNNB)
         this.board.put(new PieceModel<>(Species.DISC, "bianco"), new Pos((size/2)-1, size/2)); //B 3,4
         this.board.put(new PieceModel<>(Species.DISC, "nero"), new Pos(size/2, size/2)); //N 4,4
@@ -88,7 +88,6 @@ public class Othello implements GameRuler<PieceModel<Species>> {
         this.forced = -1;
         this.gS = new ArrayList<>(); //Primissimo status di gioco salvato nell'apposita lista
         gS.add(copy());
-        this.player1.setGame(this); this.player2.setGame(this); //Assegno una copia del gioco ai players
     }
 
     /** Il nome rispetta il formato:
@@ -124,14 +123,14 @@ public class Othello implements GameRuler<PieceModel<Species>> {
     }
 
     @Override
-    public List<String> players() { return Collections.unmodifiableList(Arrays.asList(player1.name(), player2.name())); }
+    public List<String> players() { return Collections.unmodifiableList(Arrays.asList(player1, player2)); }
 
     /** Assegna il colore "nero" al primo giocatore e "bianco" al secondo. */
     @Override
     public String color(String name) {
         if(name == null) { throw new NullPointerException("name non può essere null"); }
         if(!players().contains(name)) { throw new IllegalArgumentException("Inserire il nome di un player presente in partita"); }
-        if(player1.name().equals(name)) { return "nero"; }
+        if(Objects.equals(player1, name)) { return "nero"; }
         return "bianco"; //Unica altra possibilità
     }
 
@@ -192,7 +191,6 @@ public class Othello implements GameRuler<PieceModel<Species>> {
 
         cT = gS.get(gS.size()-2).turn(); //Ritorna al turno di gioco passato (ritorna anche in gioco se necessario)
         gS.remove(gS.size()-1); //Elimina lo status su cui è stato fatto unMove
-        player1.setGame(copy()); player2.setGame(copy()); //Reimposta i players allo stato attuale
         return true;
     }
 
@@ -274,8 +272,7 @@ public class Othello implements GameRuler<PieceModel<Species>> {
     @Override
     public GameRuler<PieceModel<Species>> copy() { return new Othello(time, size, player1, player2, Utils.bCopy(board, size, size), cT, forced, gS); }
 
-    private Othello(long t, int s, Player<PieceModel<Species>> p1, Player<PieceModel<Species>> p2,
-                    Board<PieceModel<Species>> b, int cT, int forced, List<GameRuler<PieceModel<Species>>> gS) {
+    private Othello(long t, int s, String p1, String p2, Board<PieceModel<Species>> b, int cT, int forced, List<GameRuler<PieceModel<Species>>> gS) {
         this.time = t;
         this.size = s;
         this.player1 = p1;

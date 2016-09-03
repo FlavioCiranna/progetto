@@ -36,8 +36,8 @@ public class MNKgame implements GameRuler<PieceModel<Species>> {
     private int cT;
     private int forced;
     private List<GameRuler<PieceModel<Species>>> gS;
-    private Player<PieceModel<Species>> player1;
-    private Player<PieceModel<Species>> player2;
+    private String player1;
+    private String player2;
 
 
     /** Crea un {@code MNKgame} con le impostazioni date.
@@ -62,8 +62,7 @@ public class MNKgame implements GameRuler<PieceModel<Species>> {
         this.cT = 1;
         this.forced = -1;
         this.gS = new ArrayList<>(); gS.add(copy()); //Inizializzo la lista dei game status
-        this.player1 = new RandPlayer<>(p1); this.player2 = new RandPlayer<>(p2);
-        player1.setGame(this); player2.setGame(this);
+        this.player1 = p1; this.player2 = p2;
     }
 
     /** Il nome rispetta il formato:
@@ -112,14 +111,14 @@ public class MNKgame implements GameRuler<PieceModel<Species>> {
     }
 
     @Override
-    public List<String> players() { return Collections.unmodifiableList(Arrays.asList(player1.name(), player2.name())); }
+    public List<String> players() { return Collections.unmodifiableList(Arrays.asList(player1, player2)); }
 
     /** @return il colore "nero" per il primo giocatore e "bianco" per il secondo */
     @Override
     public String color(String name) {
         if(name == null) { throw new NullPointerException("name non può essere null"); }
         if(!players().contains(name)) { throw new IllegalArgumentException("Inserire il nome di un player presente in partita"); }
-        if(player1.name().equals(name)) { return "nero"; }
+        if(Objects.equals(player1, name)) { return "nero"; }
         return "bianco"; //Unica altra possibilità
     }
 
@@ -250,7 +249,6 @@ public class MNKgame implements GameRuler<PieceModel<Species>> {
 
         cT = gS.get(gS.size()-2).turn(); //Ritorna al turno di gioco passato (ritorna anche in gioco se necessario)
         gS.remove(gS.size()-1); //Elimina lo status su cui è stato fatto unMove
-        player1.setGame(copy()); player2.setGame(copy()); //Reimposta i players allo stato attuale
         return true;
     }
 
@@ -290,7 +288,7 @@ public class MNKgame implements GameRuler<PieceModel<Species>> {
     @Override
     public GameRuler<PieceModel<Species>> copy() { return new MNKgame(time, w, h, k, player1, player2, Utils.bCopy(board, w, h), cT, forced, gS); }
 
-    private MNKgame(long time, int m, int n, int k, Player p1, Player p2, Board b, int cT, int forced, List gS) {
+    private MNKgame(long time, int m, int n, int k, String p1, String p2, Board b, int cT, int forced, List gS) {
         this.time = time;
         this.w = m;
         this.h = n;
