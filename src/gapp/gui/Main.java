@@ -5,6 +5,7 @@ import gapp.ulg.game.board.GameRuler;
 import gapp.ulg.game.board.PieceModel;
 import gapp.ulg.game.util.Utils;
 import gapp.ulg.games.GameFactories;
+import gapp.ulg.play.PlayerFactories;
 import javafx.animation.PauseTransition;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
@@ -24,6 +25,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class Main extends Application {
@@ -36,6 +38,7 @@ public class Main extends Application {
     private int sizeVal; //Dimensione Othello
     private int m,n,k; //Dimensione mnk-game
 
+    private Stage thestage;
     private Button nextScene = new Button("Next");
 
     private Parent welcome() { //Messaggio di inizio, scompare dopo tot tempo
@@ -47,12 +50,14 @@ public class Main extends Application {
 
     private BorderPane choice() {
         Text t3 = new Text("Board Size:");
-        VBox sizeBox = new VBox(t3);
+        TextField temp = new TextField("Please Select Game"); temp.setMaxWidth(Double.MAX_VALUE); temp.setDisable(true);
+        VBox sizeBox = new VBox(t3, temp);
         ListView<String> games = new ListView<>(); //Lista di giochi Disponibile
         ObservableList<String> list = FXCollections.observableArrayList(GameFactories.availableBoardFactories());
         games.setItems(list);
 
         ComboBox<String> time = new ComboBox<>(); //Lista di tempi limiti disponibile, dipende dal gioco selezionato
+        time.setValue("Please Select Game"); time.setMaxWidth(Double.MAX_VALUE);
         games.setOnMouseClicked( event -> { //Ogni click sulla lista giochi cambia la lista tempi disponibile
             time.getItems().clear(); //Ripulisce la lista o si sommerebbe all'infinito
             gF = GameFactories.getBoardFactory(games.getSelectionModel().getSelectedItem());
@@ -61,19 +66,29 @@ public class Main extends Application {
             time.setValue("No limit");
 
             if(gF.name().equals("Othello")) { //Nel caso si gioca ad Othello
+                sizeVal = 8; //Imposta valore di default
                 TextField s1 = new TextField("8");
                 TextField s2 = new TextField("8"); s2.setDisable(true);
                 s1.setMaxWidth(30); s2.setMaxWidth(30);
                 s1.setOnAction(e -> s2.setText(s1.getText()));
-                HBox hSize = new HBox(s1, new Text("x"), s2); hSize.setSpacing(5);
+                HBox hSize = new HBox(5, s1, new Text("x"), s2);
                 sizeBox.getChildren().clear(); sizeBox.getChildren().addAll(t3, hSize);
+                nextScene.setOnAction(e -> {
+                    sizeVal = Integer.valueOf(s1.getText());
+                    thestage.setScene(new Scene(playerSelect()));
+                });
             }
 
             if(gF.name().equals("m,n,k-game")) { //Nel caso si gioca ad mnk-game
+                m = n = k = 3; //Imposta i valori di default
                 TextField m = new TextField("3"), n = new TextField("3"), k = new TextField("3");
                 m.setMaxWidth(30); n.setMaxWidth(30); k.setMaxWidth(30);
-                HBox hSize = new HBox(m, n, k); hSize.setSpacing(5);
+                HBox hSize = new HBox(5, m, n, k);
                 sizeBox.getChildren().clear(); sizeBox.getChildren().addAll(t3, hSize);
+                nextScene.setOnAction(e -> {
+                    this.m = Integer.valueOf(m.getText()); this.n = Integer.valueOf(n.getText()); this.k = Integer.valueOf(k.getText());
+                    thestage.setScene(new Scene(playerSelect()));
+                });
             }
 
         });
@@ -81,9 +96,7 @@ public class Main extends Application {
         time.setOnMouseClicked( event -> timeVal = Utils.mapTime().get(time.getSelectionModel().getSelectedItem())); //Imposto il tempo dalla selezione
 
         Text t1 = new Text("Select Game:"), t2 = new Text("Select time limit:");
-        TextField tf =  new TextField("Select game"); tf.setDisable(true);
-        VBox left = new VBox(t1, games), right = new VBox(t2, time, sizeBox);
-        left.setSpacing(10); right.setSpacing(10);
+        VBox left = new VBox(10, t1, games), right = new VBox(10, t2, time, sizeBox);
         HBox items = new HBox(left, right); items.setAlignment(Pos.CENTER); items.setSpacing(30);
 
         BorderPane bp = new BorderPane(items);
@@ -92,16 +105,28 @@ public class Main extends Application {
         return bp;
     }
 
+    private Parent playerSelect() {
+        HBox pNames = new HBox(10);
+        for(int n = 0; n < gF.maxPlayers(); n++) { //Crea tanti campi quanti il numero di player
+            ComboBox<String> pKind = new ComboBox<>(); pKind.setMaxWidth(Double.MAX_VALUE);
+            pKind.getItems().addAll(PlayerFactories.availableBoardFactories()); pKind.setValue(PlayerFactories.availableBoardFactories()[1]);
+            pKind.getItems().add("Player");
+            VBox t = new VBox(10, new Text("Player"+(n+1)+" Name:"), new TextField(), pKind);
+            pNames.getChildren().addAll(t);
+        }
+
+        return pNames; //Non esattamente
+    }
+
     @Override
     public void start(Stage primaryStage) {
+        thestage = primaryStage;
         primaryStage.setTitle("Tabletop Games");
         primaryStage.setScene(new Scene(welcome(), 800, 600)); //Pagina di benvenuto
 
         PauseTransition delay = new PauseTransition(Duration.seconds(1)); //Passaggio a pagina impostazione game (AUMENTARE A 4!)
         delay.setOnFinished( event -> primaryStage.setScene(new Scene(choice())) );
         delay.play();
-
-
 
         primaryStage.show();
     }
