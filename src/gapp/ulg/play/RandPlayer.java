@@ -17,8 +17,8 @@ import java.util.Random;
  * mossa tra quelle valide esclusa {@link Move.Kind#RESIGN}.
  * @param <P>  tipo del modello dei pezzi */
 public class RandPlayer<P> implements Player<P> {
-    public String name;
-    private GameRuler<P> gameRul;
+    private String name;
+    private GameRuler<P> gameRul = null;
 
     /** Crea un giocatore random, capace di giocare a un qualsiasi gioco, che ad
      * ogni suo turno fa una mossa scelta in modo random tra quelle valide.
@@ -27,7 +27,6 @@ public class RandPlayer<P> implements Player<P> {
     public RandPlayer(String name) {
         if(name == null) { throw new NullPointerException("Il nome del player non può essere null"); }
         this.name = name;
-        this.gameRul = null;
     }
 
     @Override
@@ -35,7 +34,7 @@ public class RandPlayer<P> implements Player<P> {
 
     @Override
     public void setGame(GameRuler<P> g) {
-        if(g == null) { throw new IllegalArgumentException("Il gioco non può essere null"); }
+        if(g == null) { throw new NullPointerException("Il gioco non può essere null"); }
         gameRul = g;
     }
 

@@ -204,6 +204,9 @@ public class PlayerGUI<P> implements Player<P> {
         void resign();
     }
 
+    private String name;
+    private Consumer<MoveChooser<P>> master;
+    private GameRuler<P> gameRul = null;
 
     /** Crea un {@link PlayerGUI} con il nome e il master specificati. L'oggetto
      * {@link Consumer} master ad ogni richiesta di una mossa (vedi
@@ -217,13 +220,13 @@ public class PlayerGUI<P> implements Player<P> {
      * @param master  il master
      * @throws NullPointerException se {@code name} o {@code master} è null */
     public PlayerGUI(String name, Consumer<MoveChooser<P>> master) {
-        throw new UnsupportedOperationException("PROGETTO: DA IMPLEMENTARE");
+        if(name == null || master == null) { throw new NullPointerException("Il nome del player o il suo master non possono essere null"); }
+        this.name = name;
+        this.master = master;
     }
 
     @Override
-    public String name() {
-        throw new UnsupportedOperationException("PROGETTO: DA IMPLEMENTARE");
-    }
+    public String name() { return name; }
 
     /** Il gioco può essere impostato una sola volta. In altre parole questo oggetto
      * può essere usato solamente per una partita. Nelle invocazioni succesive alla
@@ -231,7 +234,9 @@ public class PlayerGUI<P> implements Player<P> {
      * @throws IllegalArgumentException se un gioco è stato già impostato */
     @Override
     public void setGame(GameRuler<P> g) {
-        throw new UnsupportedOperationException("PROGETTO: DA IMPLEMENTARE");
+        if(g == null) { throw new NullPointerException("Il gioco non può essere null"); }
+        if(gameRul != null) { throw new IllegalArgumentException("Il gioco è già stato impostato"); }
+        gameRul = g;
     }
 
     @Override

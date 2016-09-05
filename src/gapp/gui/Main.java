@@ -48,7 +48,7 @@ public class Main extends Application {
         return vb;
     }
 
-    private BorderPane choice() {
+    private BorderPane choice() { //Sostituire dimensioni con ComboBox? Mostrare Messaggio di errore?
         Text t3 = new Text("Board Size:");
         TextField temp = new TextField("Please Select Game"); temp.setMaxWidth(Double.MAX_VALUE); temp.setDisable(true);
         VBox sizeBox = new VBox(t3, temp);
@@ -111,11 +111,13 @@ public class Main extends Application {
             ComboBox<String> pKind = new ComboBox<>(); pKind.setMaxWidth(Double.MAX_VALUE);
             pKind.getItems().addAll(PlayerFactories.availableBoardFactories()); pKind.setValue(PlayerFactories.availableBoardFactories()[1]);
             pKind.getItems().add("Player");
-            VBox t = new VBox(10, new Text("Player"+(n+1)+" Name:"), new TextField(), pKind);
+            VBox t = new VBox(10, new Text("Player "+(n+1)+" Name:"), new TextField(), pKind);
             pNames.getChildren().addAll(t);
         }
 
-        return pNames; //Non esattamente
+        BorderPane bp = new BorderPane(pNames); BorderPane.setMargin(pNames, new Insets(12,12,12,12));
+
+        return bp;
     }
 
     @Override
