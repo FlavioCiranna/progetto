@@ -3,6 +3,7 @@ package gapp.gui;
 import gapp.ulg.game.GameFactory;
 import gapp.ulg.game.board.GameRuler;
 import gapp.ulg.game.board.PieceModel;
+import gapp.ulg.game.util.PlayGUI;
 import gapp.ulg.game.util.Utils;
 import gapp.ulg.games.GameFactories;
 import gapp.ulg.play.PlayerFactories;
@@ -33,13 +34,9 @@ public class Main extends Application {
         launch(args);
     }
 
-    private GameFactory<GameRuler<PieceModel<PieceModel.Species>>> gF;
-    private long timeVal = (long) -1; //Valore di default
-    private int sizeVal; //Dimensione Othello
-    private int m,n,k; //Dimensione mnk-game
-
-    private Stage thestage;
-    private Button nextScene = new Button("Next");
+    private static GameSpecs gSpecs = new GameSpecs();
+    public static PlayGUI playGUI = new PlayGUI(gSpecs, 10000);
+    public static Stage thestage;
 
     private Parent welcome() { //Messaggio di inizio, scompare dopo tot tempo
         Text message = new Text("-MESSAGGIO DI BENVENUTO DA DECIDERE-");
@@ -47,7 +44,7 @@ public class Main extends Application {
         VBox vb = new VBox(message); vb.setAlignment(Pos.CENTER);
         return vb;
     }
-
+/*
     private BorderPane choice() { //Sostituire dimensioni con ComboBox? Mostrare Messaggio di errore?
         Text t3 = new Text("Board Size:");
         TextField temp = new TextField("Please Select Game"); temp.setMaxWidth(Double.MAX_VALUE); temp.setDisable(true);
@@ -119,7 +116,7 @@ public class Main extends Application {
 
         return bp;
     }
-
+*/
     @Override
     public void start(Stage primaryStage) {
         thestage = primaryStage;
@@ -127,7 +124,7 @@ public class Main extends Application {
         primaryStage.setScene(new Scene(welcome(), 800, 600)); //Pagina di benvenuto
 
         PauseTransition delay = new PauseTransition(Duration.seconds(1)); //Passaggio a pagina impostazione game (AUMENTARE A 4!)
-        delay.setOnFinished( event -> primaryStage.setScene(new Scene(choice())) );
+        delay.setOnFinished( event -> SettingUp.setUPmenu() );
         delay.play();
 
         primaryStage.show();
