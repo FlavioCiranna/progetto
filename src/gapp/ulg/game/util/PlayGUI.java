@@ -90,7 +90,7 @@ public class PlayGUI<P> {
     private ExecutorService cThr;
     private Observer<P> obs;
     private long mbt;
-    private GameFactory gF;
+    public GameFactory gF;
     private GameRuler gR;
     private List<PlayerFactory> pF = new ArrayList<>();
     private List<Player> pL = new ArrayList<>();

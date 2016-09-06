@@ -15,7 +15,7 @@ import java.util.Map;
 
 public class SettingUp {
 
-    public static void setUPmenu(){
+    public static void setUPmenu(){ //Problema nel cambio di gioco con i parametri, correzione futura
         BorderPane setMenu = new BorderPane(); //Layout principale
         Map<String,ComboBox> paramsMap = new HashMap<>(); //Aggiornamento dei combobox nel caso abbiano caratteristiche interlacciate
 
@@ -67,7 +67,7 @@ public class SettingUp {
                 alert.setTitle("Warning"); alert.setHeaderText(null); alert.setContentText("Please, select a game.");
                 alert.showAndWait();
             }
-            else {  }
+            else { PlayerSetUP.pSetUPMenu(); }
         });
         Button exit = new Button("Exit"); exit.setPrefWidth(70); exit.setOnAction( e -> Main.thestage.close());
         HBox buttons = new HBox(5, next, exit);
