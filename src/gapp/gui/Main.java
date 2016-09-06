@@ -1,33 +1,15 @@
 package gapp.gui;
 
-import gapp.ulg.game.GameFactory;
-import gapp.ulg.game.board.GameRuler;
-import gapp.ulg.game.board.PieceModel;
 import gapp.ulg.game.util.PlayGUI;
-import gapp.ulg.game.util.Utils;
-import gapp.ulg.games.GameFactories;
-import gapp.ulg.play.PlayerFactories;
 import javafx.animation.PauseTransition;
 import javafx.application.Application;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextField;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-
-import java.util.Arrays;
-import java.util.List;
 
 public class Main extends Application {
     public static void main(String[] args) {

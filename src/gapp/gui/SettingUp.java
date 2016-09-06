@@ -41,6 +41,7 @@ public class SettingUp {
             setMenu.setRight(opts);
         });
 
+
         setMenu.setCenter(centerPane);
         setMenu.setPadding(new Insets(12,12,12,12));
         Main.thestage.setScene(new Scene(setMenu));
