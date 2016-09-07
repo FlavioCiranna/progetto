@@ -43,8 +43,9 @@ public class PlayerSetUP {
                 if(elems.getChildren().get(i).equals(buttons)) { break; }
                 String name = ((TextField)((HBox)elems.getChildren().get(i)).getChildren().get(1)).getText();
                 String type = (String)((ComboBox)((HBox)elems.getChildren().get(i)).getChildren().get(2)).getValue(); //Troppi Cast, semplificare in seguito
-                if(Objects.equals(type, "Player")) { Main.playGUI.setPlayerGUI(i, name, GameSpecs.humanPlayer()); } //Errore, humanPlayer ancora da scrivere
-                else { Main.playGUI.setPlayerFactory(i, type, name, null); } //Non sono certo del null, potrebbe essere necessario su alcuni tipi di giocatore
+
+                if(Objects.equals(type, "Player")) { Main.playGUI.setPlayerGUI(i-1, name, GameSpecs.humanPlayer()); } //Errore, humanPlayer ancora da scrivere
+                else { Main.playGUI.setPlayerFactory(i-1, type, name, null); } //Non sono certo del null, potrebbe essere necessario su alcuni tipi di giocatore
             }
             if(!Main.playGUI.enoughPlayers()) {
                 Alert alert = new Alert(Alert.AlertType.WARNING);

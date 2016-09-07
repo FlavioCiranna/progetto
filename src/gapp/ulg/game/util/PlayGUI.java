@@ -310,7 +310,7 @@ public class PlayGUI<P> {
                 pF.add(pIndex, null);
                 pL.add(pIndex, new PlayerGUI<>(pName, master));
             }
-            else{
+            else {
                 pF.set(pIndex, null);
                 pL.set(pIndex, new PlayerGUI<>(pName, master));
             }

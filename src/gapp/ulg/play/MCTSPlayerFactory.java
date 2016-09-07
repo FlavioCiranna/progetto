@@ -7,6 +7,8 @@ import gapp.ulg.game.board.GameRuler;
 import gapp.ulg.game.board.Player;
 
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -38,24 +40,72 @@ public class MCTSPlayerFactory<P> implements PlayerFactory<Player<P>,GameRuler<P
      * @return la lista con i due parametri */
     @Override
     public List<Param<?>> params() {
-        throw new UnsupportedOperationException("DA IMPLEMENTARE");
+
+        Param<Object> rollouts = new Param<Object>() {
+            private Object value = 50; //Valore di default
+
+            @Override
+            public String name() { return "Rollouts"; }
+
+            @Override
+            public String prompt() { return "Number of rollouts per move"; }
+
+            @Override
+            public List values() { return Arrays.asList(1,10,50,100,200,500,1000); }
+
+            @Override
+            public void set(Object v) {
+                if(values().contains(v)) { value = v; }
+                else throw new IllegalArgumentException("Il valore non è consentito");
+            }
+
+            @Override
+            public Object get() { return value; }
+        };
+
+        Param<Object> exec = new Param<Object>() {
+            private Object value = "Sequential";
+
+            @Override
+            public String name() { return "Execution"; }
+
+            @Override
+            public String prompt() { return "Threaded execution"; }
+
+            @Override
+            public List values() { return Arrays.asList("Sequential","Parallel"); }
+
+            @Override
+            public void set(Object v) {
+                if(values().contains(v)) { value = v; }
+                else throw new IllegalArgumentException("Il valore non è consentito");
+            }
+
+            @Override
+            public Object get() { return value; }
+        };
+
+        return Collections.unmodifiableList(Arrays.asList(rollouts, exec));
     }
 
     @Override
     public Play canPlay(GameFactory<? extends GameRuler<P>> gF) {
-        throw new UnsupportedOperationException("DA IMPLEMENTARE");
+        if(gF == null) {throw new NullPointerException("La GameFactory non può essere null"); }
+        return Play.YES;
     }
 
     @Override
     public String tryCompute(GameFactory<? extends GameRuler<P>> gF, boolean parallel,
                              Supplier<Boolean> interrupt) {
-        throw new UnsupportedOperationException("DA IMPLEMENTARE");
+        if(gF == null) { throw new NullPointerException("La GameFactory non può essere null"); }
+        return null;
     }
 
     /** Ritorna un {@link MCTSPlayer} che rispetta i parametri impostati
      * {@link MCTSPlayerFactory#params()} e il nome specificato. */
     @Override
     public Player<P> newPlayer(GameFactory<? extends GameRuler<P>> gF, String name) {
-        throw new UnsupportedOperationException("DA IMPLEMENTARE");
+        if(gF == null || name == null) { throw new NullPointerException("La GameFactory o il nome del giocatore sono null"); }
+        return new MCTSPlayer<>(name, 50, true);
     }
 }
