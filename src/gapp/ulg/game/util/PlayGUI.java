@@ -503,6 +503,8 @@ public class PlayGUI<P> {
         });
     }
 
+    public boolean enoughPlayers() { return !(gF.minPlayers() > pL.size() || pL.size() == 0); }
+
 
     /** Inizia una partita con un gioco fabbricato dalla GameFactory impostata e i
      * giocatori forniti da {@link PlayerGUI} impostati o fabbricati dalle
@@ -538,13 +540,46 @@ public class PlayGUI<P> {
      * sono sufficienti PlayerFactory impostate o la creazione del GameRuler o quella
      * di qualche giocatore fallisce o se già c'è una partita in corso. */
     public void play(long tol, long timeout, long minTime, int maxTh, int fjpSize, int bgExecSize) {
-        throw new UnsupportedOperationException("PROGETTO: DA IMPLEMENTARE");
+        if(cThr.isShutdown()) { cThrRestart(); }
+
+        cThr.execute(() -> {
+            if(gF == null) { throw new NullPointerException("Nessuna GameFactory impostata"); }
+            if (gR != null && gR.result() == -1) throw new IllegalStateException();
+            try {
+                String[] names = new String[pL.size()];
+                for (int i = 0; i < pL.size(); i++) { names[i] = pL.get(i).name(); }
+
+                gF.setPlayerNames(names);
+                gR = (GameRuler)gF.newGame();
+                for (Player player: pL) { player.setGame(gR.copy()); }
+                obs.setGame(gR.copy());
+
+                //contr = Executors.newSingleThreadExecutor(); //Vedere se è utile
+            } catch (Exception ignore) {}
+        });
     }
+
+    //public void nextmove()
 
     /** Se c'è una partita in corso la termina immediatamente e ritorna true,
      * altrimenti non fa nulla e ritorna false.
      * @return true se termina la partita in corso, false altrimenti */
     public boolean stop() {
-        throw new UnsupportedOperationException("PROGETTO: DA IMPLEMENTARE");
+        if(cThr.isShutdown()) { cThrRestart(); }
+
+        Future<Boolean> task = cThr.submit(() -> {
+            if (gR == null || gR.result() != -1) { return false; }
+
+            gR = null; pL.clear(); obs.interrupted("PlayGUI.stop()"); //Svuota e interrompe tutto
+            return true;
+        });
+
+        try { return task.get(); }
+        catch (Exception ignore) {}
+
+        cThr.shutdown(); //Interrompo thread di esecuzione
+        //contr.shutdown();
+
+        return false; //Unica alternativa
     }
 }

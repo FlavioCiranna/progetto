@@ -3,7 +3,10 @@ package gapp.gui;
 import gapp.ulg.game.board.GameRuler;
 import gapp.ulg.game.board.Move;
 import gapp.ulg.game.util.PlayGUI;
+import gapp.ulg.game.util.PlayerGUI;
 import javafx.scene.layout.Pane;
+
+import java.util.function.Consumer;
 
 
 public class GameSpecs extends Pane implements PlayGUI.Observer{
@@ -25,7 +28,7 @@ public class GameSpecs extends Pane implements PlayGUI.Observer{
 
         gR.move(m);
 
-        //Riservato per implementazioni future sulla board
+        //Riservato per aggiornare la tavola da gioco in forma grafica
     }
 
     @Override
@@ -40,5 +43,9 @@ public class GameSpecs extends Pane implements PlayGUI.Observer{
     @Override
     public void interrupted(String msg) { //Indagare sull'utilizzo futuro
         vMsg = msg;
+    }
+
+    public static Consumer<PlayerGUI.MoveChooser> humanPlayer() {
+        return null; //Temporaneo
     }
 }
