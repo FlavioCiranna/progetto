@@ -11,6 +11,7 @@ import gapp.ulg.play.PlayerFactories;
 
 import static gapp.ulg.game.util.PlayerGUI.MoveChooser;
 
+import java.lang.reflect.Array;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -298,7 +299,22 @@ public class PlayGUI<P> {
      * @throws IllegalStateException se non c'è una GameFactory impostata o se c'è
      * una partita in corso. */
     public void setPlayerGUI(int pIndex, String pName, Consumer<MoveChooser<P>> master) {
-        throw new UnsupportedOperationException("PROGETTO: DA IMPLEMENTARE");
+        if(cThr.isShutdown()) { cThrRestart(); }
+
+        cThr.execute(() -> {
+            if(pName == null || master == null) { throw new NullPointerException("Il nome del giocatore o il master non possono essere null"); }
+            if(gF.maxPlayers() <= pIndex || gF == null ||
+                    (gR != null && gR.result() == -1)) { throw new IllegalArgumentException("Indice non congruente o partita ancora in corso"); }
+
+            if(pIndex >= pL.size()) {
+                pF.add(pIndex, null);
+                pL.add(pIndex, new PlayerGUI<>(pName, master));
+            }
+            else{
+                pF.set(pIndex, null);
+                pL.set(pIndex, new PlayerGUI<>(pName, master));
+            }
+        });
     }
 
 
@@ -320,7 +336,32 @@ public class PlayGUI<P> {
      * @throws IllegalStateException se la creazione della PlayerFactory fallisce o
      * se non c'è una GameFactory impostata o se c'è una partita in corso. */
     public PlayerFactory.Play setPlayerFactory(int pIndex, String fName, String pName, Path dir) {
-        throw new UnsupportedOperationException("PROGETTO: DA IMPLEMENTARE");
+        if(cThr.isShutdown()) { cThrRestart(); }
+
+        Future<PlayerFactory.Play> task = cThr.submit(() -> {
+            if(fName == null || pName == null) { throw new NullPointerException("Il nome della PlayerFactory o il nome del giocatore non possono essere null"); }
+            if(gF.maxPlayers() <= pIndex) { throw new IllegalArgumentException("Indice non congruente con la PlayerFactory"); }
+            if(gF == null || (gR != null && gR.result() == -1)) { throw new IllegalArgumentException("Nessuna GameFactory impostata, partita in corso o non impostata"); }
+            if(!Arrays.asList(PlayerFactories.availableBoardFactories()).contains(fName)) { throw new IllegalArgumentException("Nessuna PlayerFactory corrispondente"); }
+
+            if (PlayerFactories.getBoardFactory(fName).canPlay(gF) == PlayerFactory.Play.YES) {
+                if (pIndex >= pL.size()) {
+                    pF.add(pIndex, PlayerFactories.getBoardFactory(fName));
+                    pL.add(pIndex, (Player)pF.get(pIndex).newPlayer(gF,pName));
+                }
+                else{
+                    pF.set(pIndex, PlayerFactories.getBoardFactory(fName));
+                    pL.set(pIndex, (Player)pF.get(pIndex).newPlayer(gF,pName));
+                }
+            }
+
+            return pF.get(pIndex).canPlay(gF);
+        });
+
+        try{ return task.get(); }
+        catch (Exception ignore) {}
+
+        return null;
     }
 
     /** Ritorna i nomi dei parametri della {@link PlayerFactory} di indice
@@ -330,7 +371,20 @@ public class PlayGUI<P> {
      * @throws IllegalArgumentException se non c'è una PlayerFactory di indice
      * {@code pIndex} */
     public String[] getPlayerFactoryParams(int pIndex) {
-        throw new UnsupportedOperationException("PROGETTO: DA IMPLEMENTARE");
+        if(cThr.isShutdown()) { cThrRestart(); }
+
+        Future<String[]> task = cThr.submit(() -> {
+            if(pF.get(pIndex) == null) { throw new IllegalArgumentException("Nessuna PlayerFactory di indice corrispondente"); }
+
+            String[] par = new String[pF.get(pIndex).params().size()];
+            for (int i = 0; i < pF.get(pIndex).params().size(); i++) { par[i] = ((Param)pF.get(pIndex).params().get(i)).name(); }
+            return par;
+        });
+
+        try { return task.get(); }
+        catch (Exception ignore) {}
+
+        return null;
     }
 
     /** Ritorna il prompt del parametro con il nome specificato della
@@ -343,7 +397,23 @@ public class PlayGUI<P> {
      * @throws IllegalArgumentException se la PlayerFactory non ha un parametro di
      * nome {@code paramName} o non c'è una PlayerFactory di indice {@code pIndex} */
     public String getPlayerFactoryParamPrompt(int pIndex, String paramName) {
-        throw new UnsupportedOperationException("PROGETTO: DA IMPLEMENTARE");
+        if(cThr.isShutdown()) { cThrRestart(); }
+
+        Future<String> task = cThr.submit(() -> {
+           if(paramName == null) { throw new NullPointerException("Nome del parametro non può essere null"); }
+           if(pF.get(pIndex) == null) { throw new IllegalArgumentException("Nessuna PlayerFactory di indice corrispondente"); }
+
+            for (int i = 0; i < pF.get(pIndex).params().size(); i++) {
+                if (Objects.equals(((Param) pF.get(pIndex).params().get(i)).name(), paramName)) { return ((Param) pF.get(pIndex).params().get(i)).prompt(); }
+            }
+
+            throw new IllegalArgumentException("Nessun parametro corrispondente trovato");
+        });
+
+        try { return task.get(); }
+        catch (Exception ignored) {}
+
+        return null;
     }
 
     /** Ritorna i valori ammissibili per il parametro di nome dato della
@@ -356,7 +426,23 @@ public class PlayGUI<P> {
      * @throws IllegalArgumentException se la PlayerFactory non ha un parametro di
      * nome {@code paramName} o non c'è una PlayerFactory di indice {@code pIndex} */
     public Object[] getPlayerFactoryParamValues(int pIndex, String paramName) {
-        throw new UnsupportedOperationException("PROGETTO: DA IMPLEMENTARE");
+        if(cThr.isShutdown()) { cThrRestart(); }
+
+        Future<Object[]> task = cThr.submit(() -> {
+            if(paramName == null) { throw new NullPointerException("Il nome del parametro non può essere null"); }
+            if(pF.get(pIndex) == null) { throw new IllegalArgumentException("Nessuna PlayerFactory corrispondente trovata"); }
+
+            for (int i = 0; i < pF.get(pIndex).params().size(); i++) {
+                if (Objects.equals(((Param) pF.get(pIndex).params().get(i)).name(), paramName)) { return ((Param) pF.get(pIndex).params().get(i)).values().toArray(); }
+            }
+
+            throw new IllegalArgumentException("Nessun parametro corrispondente trovato");
+        });
+
+        try { return task.get(); }
+        catch (Exception ignore) {}
+
+        return null;
     }
 
     /** Ritorna il valore del parametro di nome dato della {@link PlayerFactory} di
@@ -369,7 +455,23 @@ public class PlayGUI<P> {
      * @throws IllegalArgumentException se la PlayerFactory non ha un parametro di
      * nome {@code paramName} o non c'è una PlayerFactory di indice {@code pIndex} */
     public Object getPlayerFactoryParamValue(int pIndex, String paramName) {
-        throw new UnsupportedOperationException("PROGETTO: DA IMPLEMENTARE");
+        if(cThr.isShutdown()) { cThrRestart(); }
+
+        Future<Object> task = cThr.submit(() -> {
+            if(paramName == null) { throw new NullPointerException("Il nome del parametro non può essere null"); }
+            if(pF.get(pIndex) == null) { throw new IllegalArgumentException("Nessuna PlayerFactory corrispondente"); }
+
+            for (int i = 0; i < pF.get(pIndex).params().size(); i++) {
+                if (((Param)pF.get(pIndex).params().get(i)).name() == paramName) { return ((Param) pF.get(pIndex).params().get(i)).get(); }
+            }
+
+            throw new IllegalArgumentException("Nessun parametro corrispondente trovato");
+        });
+
+        try { return task.get(); }
+        catch (Exception ignore) {}
+
+        return null;
     }
 
     /** Imposta il valore del parametro di nome dato della {@link PlayerFactory}
@@ -383,7 +485,22 @@ public class PlayGUI<P> {
      * parametro o non c'è una PlayerFactory di indice {@code pIndex}
      * @throws IllegalStateException se c'è una partita in corso */
     public void setPlayerFactoryParamValue(int pIndex, String paramName, Object value) {
-        throw new UnsupportedOperationException("PROGETTO: DA IMPLEMENTARE");
+        if(cThr.isShutdown()) { cThrRestart(); }
+
+        cThr.execute(() -> {
+            if(paramName == null || value == null) { throw new NullPointerException("Il nome del parametro o value non possono essere null"); }
+            if(pF.get(pIndex) == null) { throw new IllegalArgumentException("Nessuna PlayerFactory corrispondente trovata"); }
+
+            for (int i = 0; i < pF.get(pIndex).params().size(); i++) {
+                if (((Param)pF.get(pIndex).params().get(i)).name() == paramName) {
+                    ((Param) pF.get(pIndex).params().get(i)).set(value);
+                    pL.set(pIndex,(Player)pF.get(pIndex).newPlayer(gF,pL.get(pIndex).name()));
+                    return;
+                }
+            }
+
+            throw new IllegalArgumentException("Il valore non è ammissibile per il parametro corrispondente");
+        });
     }
 
 

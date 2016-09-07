@@ -40,6 +40,12 @@ public class SettingUp {
                 ComboBox cb = new ComboBox(); cb.getItems().addAll(Main.playGUI.getGameFactoryParamValues(p));
                 cb.setPrefWidth(80);
 
+                info.setOnAction(e -> {
+                    Alert inf = new Alert(Alert.AlertType.INFORMATION);
+                    inf.setTitle("Info"); inf.setHeaderText(null); inf.setContentText(Main.playGUI.getGameFactoryParamPrompt(p));
+                    inf.showAndWait();
+                });
+
                 cb.setOnAction(e -> {
                     Main.playGUI.setGameFactoryParamValue(p, cb.getValue());
 

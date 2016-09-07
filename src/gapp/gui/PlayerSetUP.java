@@ -6,8 +6,6 @@ public class PlayerSetUP {
     public static void pSetUPMenu() {
         VBox elems = new VBox(10);
 
-        for(int i = 0; i < Main.playGUI.gF.maxPlayers(); i++) {
-
-        }
+        for(int i = 0; i < Main.playGUI.gF.maxPlayers(); i++) {}
     }
 }
