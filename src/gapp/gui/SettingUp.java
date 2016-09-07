@@ -62,7 +62,7 @@ public class SettingUp {
         //Pannello inferiore
         Button next = new Button("Next"); next.setPrefWidth(70);
         next.setOnAction( e -> {
-            if(games.getSelectionModel().getSelectedIndex() <= 0) {
+            if(games.getSelectionModel().getSelectedIndex() < 0) {
                 Alert alert = new Alert(Alert.AlertType.WARNING);
                 alert.setTitle("Warning"); alert.setHeaderText(null); alert.setContentText("Please, select a game.");
                 alert.showAndWait();
