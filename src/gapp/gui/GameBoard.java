@@ -4,12 +4,12 @@ import gapp.ulg.game.board.GameRuler;
 import gapp.ulg.game.board.Move;
 import gapp.ulg.game.util.PlayGUI;
 import gapp.ulg.game.util.PlayerGUI;
-import javafx.scene.layout.Pane;
+import javafx.scene.layout.GridPane;
 
 import java.util.function.Consumer;
 
 
-public class GameBoard extends Pane implements PlayGUI.Observer{
+public class GameBoard extends GridPane implements PlayGUI.Observer{
     private static GameBoard sharedBoard; //Tavolo da gioco dell'istanza, uno solo per avvio di applicazione
 
     private static final int bCells = 30;
@@ -24,9 +24,14 @@ public class GameBoard extends Pane implements PlayGUI.Observer{
     }
 
     @Override
-    public void setGame(GameRuler g) {
+    public void setGame(GameRuler g) { //Non riesco a far comparire il contenuto del GridPane
         if(g == null) { throw new NullPointerException("Il gioco non può essere null"); }
+
         this.gR = g;
+
+        setMaxHeight(gR.getBoard().height() * bCells); setMaxWidth(gR.getBoard().height() * bCells);
+
+
     }
 
     @Override
