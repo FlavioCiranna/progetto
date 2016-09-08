@@ -16,7 +16,7 @@ public class Main extends Application {
         launch(args);
     }
 
-    private static GameSpecs gSpecs = new GameSpecs();
+    private static GameBoard gSpecs = GameBoard.getSharedBoard();
     public static PlayGUI playGUI = new PlayGUI(gSpecs, 10000);
     public static Stage thestage;
 

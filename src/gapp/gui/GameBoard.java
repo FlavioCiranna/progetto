@@ -9,11 +9,19 @@ import javafx.scene.layout.Pane;
 import java.util.function.Consumer;
 
 
-public class GameSpecs extends Pane implements PlayGUI.Observer{
-    private GameRuler gR;
-    private String vMsg;
+public class GameBoard extends Pane implements PlayGUI.Observer{
+    private static GameBoard sharedBoard; //Tavolo da gioco dell'istanza, uno solo per avvio di applicazione
 
-    public GameSpecs() { super(); }
+    private static final int bCells = 30;
+    //private static Map<Pos, pezzoUI> gameMap;
+    private static GameRuler gR;
+    private static String vMsg;
+
+    public GameBoard() { super(); }
+    public static GameBoard getSharedBoard() {
+        if(sharedBoard == null) { sharedBoard = new GameBoard(); }
+        return sharedBoard;
+    }
 
     @Override
     public void setGame(GameRuler g) {
@@ -27,8 +35,6 @@ public class GameSpecs extends Pane implements PlayGUI.Observer{
         if(!gR.isPlaying(i) || !gR.isValid(m)) { throw new IllegalArgumentException("Il giocatore o la mossa non sono validi"); }
 
         gR.move(m);
-
-        //Riservato per aggiornare la tavola da gioco in forma grafica
     }
 
     @Override
