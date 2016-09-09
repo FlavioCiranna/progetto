@@ -72,7 +72,11 @@ public class GameBoard extends GridPane implements PlayGUI.Observer{
                 }
 
                 if(action.getKind() == Action.Kind.SWAP) {
-
+                    int counter = 0;
+                    for(Pos p : (List<Pos>) action.getPos()) {
+                        GamePM pm = new GamePM((PieceModel) action.getPiece(), (Pos) action.getPos().get(counter));
+                        putPiece(pm, p); counter++;
+                    }
                 }
             }
         }
