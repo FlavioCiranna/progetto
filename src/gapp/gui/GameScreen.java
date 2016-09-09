@@ -5,6 +5,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 
 public class GameScreen {
     public static void showGame() {
@@ -18,8 +19,10 @@ public class GameScreen {
         GameBoard board = GameBoard.getSharedBoard(); //board.setGridLinesVisible(true);
         gamePane.setCenter(board);
 
-        Button exit = new Button("Exit"); exit.setPrefWidth(70); exit.setOnAction(e -> Main.thestage.close());
-        gamePane.setBottom(exit); BorderPane.setAlignment(exit, Pos.BOTTOM_RIGHT);
+        Button exit = new Button("Exit"); /*exit.setPrefWidth(70);*/ exit.setOnAction(e -> Main.thestage.close());
+        Button next = new Button("Next"); next.setOnAction(e -> Main.playGUI.execTurn());
+        HBox buttons = new HBox(10, next, exit);
+        gamePane.setBottom(buttons); BorderPane.setAlignment(buttons, Pos.BOTTOM_RIGHT);
 
         Main.thestage.setScene(new Scene(gamePane, 800, 600));
     }

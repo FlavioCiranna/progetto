@@ -53,7 +53,10 @@ public class SettingUp {
                         String par = entry.getKey();
                         ComboBox cbox = entry.getValue();
 
-                        if (cbox != e.getSource()) { cbox.getItems().setAll(Main.playGUI.getGameFactoryParamValues(par)); }
+                        if (cbox != e.getSource()) {
+                            try{ cbox.getItems().setAll(Main.playGUI.getGameFactoryParamValues(par)); }
+                            catch (Exception ignore) {}
+                        }
                     }
                 });
 

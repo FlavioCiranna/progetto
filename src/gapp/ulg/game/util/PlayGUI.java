@@ -554,12 +554,30 @@ public class PlayGUI<P> {
                 for (Player player: pL) { player.setGame(gR.copy()); }
                 obs.setGame(gR.copy());
 
-                //contr = Executors.newSingleThreadExecutor(); //Vedere se è utile
             } catch (Exception ignore) {}
         });
     }
 
-    //public void nextmove()
+    public void execTurn() { //Esegue le mosse del player corrente e passa il turno
+
+        ExecutorService nxtThr = Executors.newSingleThreadExecutor(r -> { //Verificare se avviare un thread qui ha senso o è performante
+            Thread t = new Thread(r);
+            t.setDaemon(true);
+            return t; });
+
+        Move m;
+        Future<Move> task = nxtThr.submit(() -> pL.get(gR.turn()-1).getMove()); //Esecuzione della mossa nel nuovo thread
+
+        try {
+            m = task.get();
+            for(Player player : pL) { player.moved(gR.turn(), m); }
+            obs.moved(gR.turn(), m); //Controllare se è necessario un thread ulteriore
+            gR.move(m); //Eseguo finalmente la mossa sulla board interna
+        }
+        catch (InterruptedException | ExecutionException ignored) { }
+
+        nxtThr.shutdown();
+    }
 
     /** Se c'è una partita in corso la termina immediatamente e ritorna true,
      * altrimenti non fa nulla e ritorna false.
@@ -578,7 +596,6 @@ public class PlayGUI<P> {
         catch (Exception ignore) {}
 
         cThr.shutdown(); //Interrompo thread di esecuzione
-        //contr.shutdown();
 
         return false; //Unica alternativa
     }

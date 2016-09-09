@@ -46,19 +46,36 @@ public class GameBoard extends GridPane implements PlayGUI.Observer{
         if(!gR.mechanics().start.newMap().isEmpty()) { //Se esistono delle posizioni di start le aggiunge
             for(Pos p : (Set<Pos>)gR.getBoard().get()) {
                 GamePM pm = new GamePM((PieceModel) gR.getBoard().get(p), p);
-                setConstraints(pm, p.getB(), p.getT());
-                getChildren().add(pm);
+                putPiece(pm, p);
             }
         }
 
     }
 
+    public void putPiece(GamePM pieceM, Pos p) {
+        setConstraints(pieceM, p.getB(), p.getT());
+        getChildren().add(pieceM);
+    }
+
     @Override
-    public void moved(int i, Move m) {
+    public void moved(int i, Move m) { //Completabile solo dopo aver aggiunto delle animazioni plausibili
         if(m == null) { throw new NullPointerException("La mossa non può essere null"); }
         if(!gR.isPlaying(i) || !gR.isValid(m)) { throw new IllegalArgumentException("Il giocatore o la mossa non sono validi"); }
 
         gR.move(m);
+
+        if(m.getKind() == Move.Kind.ACTION) { //Se si tratta di una mossa che modifica la board
+            for(Action action : (List<Action>)m.getActions()) { //Per ogni azione
+                if(action.getKind() == Action.Kind.ADD) { //Se si tratta semplicemente di aggiungere pedine
+                    GamePM pm = new GamePM((PieceModel) action.getPiece(), (Pos) action.getPos().get(0));
+                    putPiece(pm, (Pos) action.getPos().get(0));
+                }
+
+                if(action.getKind() == Action.Kind.SWAP) {
+
+                }
+            }
+        }
     }
 
     @Override
@@ -75,7 +92,5 @@ public class GameBoard extends GridPane implements PlayGUI.Observer{
         vMsg = msg;
     }
 
-    public static Consumer<PlayerGUI.MoveChooser> humanPlayer() {
-        return null; //Temporaneo
-    }
+    public static Consumer<PlayerGUI.MoveChooser> humanPlayer() { return null; } //Temporaneo
 }
