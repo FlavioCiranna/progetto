@@ -241,7 +241,11 @@ public class PlayerGUI<P> implements Player<P> {
 
     @Override
     public void moved(int i, Move<P> m) {
-        throw new UnsupportedOperationException("PROGETTO: DA IMPLEMENTARE");
+        if(m == null) { throw new NullPointerException("La mossa non può essere null"); }
+        if(gameRul == null || gameRul.result() != -1) { throw new IllegalArgumentException("La partita non è impostata o è già terminata"); }
+        if(!gameRul.isPlaying(i) || !gameRul.isValid(m)) { throw new IllegalArgumentException(); }
+
+        gameRul.move(m);
     }
 
     /** Crea un {@link MoveChooser} per l'attuale situazione di gioco e lo passa

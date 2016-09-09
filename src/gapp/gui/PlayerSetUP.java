@@ -16,15 +16,15 @@ public class PlayerSetUP {
 
     public static void pSetUPMenu() {
         Label pNameL = new Label("Player Name:"), pTypeL =  new Label("Player Type:"), spacing = new Label("");
-        pNameL.setPrefWidth(150); pTypeL.setPrefWidth(80); spacing.setPrefWidth(50);
+        pNameL.setPrefWidth(150); pTypeL.setPrefWidth(150); spacing.setPrefWidth(60);
         HBox fLine = new HBox(10, spacing, pNameL, pTypeL);
         VBox elems = new VBox(10, fLine); elems.setPadding(new Insets(12,12,12,12));
 
         List<String> gTypes = Arrays.asList(PlayerFactories.availableBoardFactories());
         for(int i = 0; i < Main.playGUI.gF.maxPlayers(); i++) {
-            Label pName = new Label("Player "+(i+1)+":"); pName.setPrefWidth(50);
-            TextField name = new TextField();
-            ComboBox cb = new ComboBox();
+            Label pName = new Label("Player "+(i+1)+":"); pName.setPrefWidth(60);
+            TextField name = new TextField(); name.setPrefWidth(150);
+            ComboBox cb = new ComboBox(); cb.setPrefWidth(150);
             cb.getItems().addAll(gTypes); cb.setValue("Random Player"); cb.getItems().add("Player");
 
             //HBox line = new HBox(10, pName, name, cb);

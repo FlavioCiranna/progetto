@@ -1,15 +1,14 @@
 package gapp.gui;
 
 import gapp.gui.Elements.EmptyCell;
-import gapp.ulg.game.board.Board;
-import gapp.ulg.game.board.GameRuler;
-import gapp.ulg.game.board.Move;
-import gapp.ulg.game.board.Pos;
+import gapp.gui.Elements.GamePM;
+import gapp.ulg.game.board.*;
 import gapp.ulg.game.util.PlayGUI;
 import gapp.ulg.game.util.PlayerGUI;
 import javafx.scene.layout.GridPane;
 
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 
 
@@ -34,12 +33,21 @@ public class GameBoard extends GridPane implements PlayGUI.Observer{
         this.gR = g;
 
         setMaxHeight(gR.getBoard().height() * bCells); setMaxWidth(gR.getBoard().height() * bCells);
+        setStyle("-fx-background-color: #CCCCCC");
 
         if(gR.getBoard().system() == Board.System.OCTAGONAL) {
             for(Pos p : (List<Pos>)gR.mechanics().positions) {
                 EmptyCell ec = new EmptyCell(p);
                 setConstraints(ec, p.getB(), p.getT());
                 getChildren().add(ec);
+            }
+        }
+
+        if(!gR.mechanics().start.newMap().isEmpty()) { //Se esistono delle posizioni di start le aggiunge
+            for(Pos p : (Set<Pos>)gR.getBoard().get()) {
+                GamePM pm = new GamePM((PieceModel) gR.getBoard().get(p), p);
+                setConstraints(pm, p.getB(), p.getT());
+                getChildren().add(pm);
             }
         }
 
