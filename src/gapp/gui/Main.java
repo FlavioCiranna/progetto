@@ -16,8 +16,8 @@ public class Main extends Application {
         launch(args);
     }
 
-    private static GameBoard gSpecs = GameBoard.getSharedBoard();
-    public static PlayGUI playGUI = new PlayGUI(gSpecs, 10000);
+    private static GameBoard board ;
+    public static PlayGUI playGUI;
     public static Stage thestage;
 
     private Parent welcome() { //Messaggio di inizio, scompare dopo tot tempo
@@ -30,6 +30,9 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) {
         thestage = primaryStage;
+        board = GameBoard.getSharedBoard();
+        playGUI = new PlayGUI(board, 10000);
+
         primaryStage.setTitle("Tabletop Games");
         primaryStage.setScene(new Scene(welcome(), 800, 600)); //Pagina di benvenuto
 

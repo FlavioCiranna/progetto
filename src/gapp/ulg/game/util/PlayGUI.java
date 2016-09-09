@@ -89,7 +89,7 @@ public class PlayGUI<P> {
     }
 
     private ExecutorService cThr;
-    private Observer<P> obs;
+    private Observer obs;
     private long mbt;
     public GameFactory gF;
     private GameRuler gR;

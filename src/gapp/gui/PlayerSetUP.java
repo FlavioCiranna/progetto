@@ -24,7 +24,8 @@ public class PlayerSetUP {
         for(int i = 0; i < Main.playGUI.gF.maxPlayers(); i++) {
             Label pName = new Label("Player "+(i+1)+":"); pName.setPrefWidth(50);
             TextField name = new TextField();
-            ComboBox cb = new ComboBox(); cb.getItems().addAll(gTypes); cb.getItems().add("Player");
+            ComboBox cb = new ComboBox();
+            cb.getItems().addAll(gTypes); cb.setValue("Random Player"); cb.getItems().add("Player");
 
             //HBox line = new HBox(10, pName, name, cb);
             elems.getChildren().add(new HBox(10, pName, name, cb));
