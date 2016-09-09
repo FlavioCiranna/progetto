@@ -62,7 +62,11 @@ public class MCTSPlayer<P> implements Player<P> { //Factory non completata, test
 
     @Override
     public void moved(int i, Move<P> m) { //Non ho ancora la minima idea di cosa faccia sta cosa...
-        throw new UnsupportedOperationException("DA IMPLEMENTARE");
+        if(gameRul == null || gameRul.result() != -1) { throw new IllegalStateException("Nessun gioco impostato o ormai terminato"); }
+        if(m == null) { throw new NullPointerException("La mossa non può essere null"); }
+        if(!Arrays.asList(1, 2).contains(i) || !gameRul.isValid(m)) { throw new IllegalArgumentException("Indice di turnazione errato o la mossa non è consentita nella situazione di gioco attuale"); }
+
+        gameRul.move(m);
     }
 
     @Override
