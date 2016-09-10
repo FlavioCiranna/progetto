@@ -45,14 +45,14 @@ public class GamePM extends GameElements {
         @Override
         public void handle(long now) {
             if(a != null && kind != null && animTime >= 0) {
-                double percentage = (100 / totalAnimTime) * (totalAnimTime - animTime);
+                double percentage = (99.9 / totalAnimTime) * (totalAnimTime - animTime);
                 if(kind == Kind.DO) {
                     if(a.getKind() == Action.Kind.ADD) { //ADD + DO
                         pm.setOpacity(0.01 * percentage);
                     }
                     if(a.getKind() == Action.Kind.SWAP) { //SWAP + DO
                         pm.setScaleX((- 0.02 * percentage) + 1);
-                        if(pm.getScaleX() <= 0.01) {
+                        if(animTime <= totalAnimTime/2) {
                             PieceModel pieceModel = (PieceModel)a.piece;
                             pm.setImage(new Image("file:Resources/"+pieceModel.getSpecies()+"-"+pieceModel.getColor()+".png"));
                         }
