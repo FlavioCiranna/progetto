@@ -17,7 +17,8 @@ public class GameScreen {
         gamePane.setPadding(new Insets(12,12,12,12));
 
         GameBoard board = GameBoard.getSharedBoard(); //board.setGridLinesVisible(true);
-        gamePane.setCenter(board);
+        //StackPane cntrWindow = new ... //Per inserire eventuali messaggi in overlay
+        gamePane.setCenter(board); //Sostituire con lo StackPane più tardi
 
         Button exit = new Button("Exit"); /*exit.setPrefWidth(70);*/ exit.setOnAction(e -> Main.thestage.close());
         Button next = new Button("Next"); next.setOnAction(e -> Main.playGUI.execTurn());
