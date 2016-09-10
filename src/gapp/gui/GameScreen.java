@@ -16,7 +16,7 @@ public class GameScreen {
         BorderPane gamePane = new BorderPane();
         gamePane.setPadding(new Insets(12,12,12,12));
 
-        GameBoard board = GameBoard.getSharedBoard(); //board.setGridLinesVisible(true);
+        GameBoard board = GameBoard.getSharedBoard();
         //StackPane cntrWindow = new ... //Per inserire eventuali messaggi in overlay
         gamePane.setCenter(board); //Sostituire con lo StackPane più tardi
 

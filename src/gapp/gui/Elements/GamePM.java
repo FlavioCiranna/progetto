@@ -1,19 +1,20 @@
 package gapp.gui.Elements;
 
+import gapp.gui.GameElements;
 import gapp.ulg.game.board.Action;
 import gapp.ulg.game.board.PieceModel;
 import gapp.ulg.game.board.Pos;
 import javafx.animation.AnimationTimer;
-import javafx.scene.image.ImageView;
+import javafx.scene.image.Image;
 
-public class GamePM extends ImageView {
-    public enum Kind { SHOW, DO, UNSHOW }
+public class GamePM extends GameElements {
+    public enum Kind { DO, SHOW, UNSHOW }
     private PieceModel pm;
     private Animator animator;
     private Pos pos;
 
     public GamePM(PieceModel pm, Pos p) {
-        super("file:Resources/"+pm.getSpecies()+"-"+pm.getColor()+".png");
+        super("file:Resources/"+pm.getSpecies()+"-"+pm.getColor()+".png", p);
         this.pm = pm;
         this.pos = p;
         animator = new Animator(this);
@@ -21,12 +22,11 @@ public class GamePM extends ImageView {
     }
 
     public PieceModel getPm() { return pm; } //Verificare se mai usato
-    public Pos getPos() { return pos; }
-    public void animatePiece(Action.Kind ak, Kind k) { animator.animate(ak, k); }
+    public void animatePiece(Action a, Kind k) { animator.animate(a, k); }
 
     private class Animator extends AnimationTimer {
         private GamePM pm;
-        private Action.Kind aKind;
+        private Action a;
         private Kind kind;
         private final double totalAnimTime;
         private double animTime;
@@ -36,22 +36,26 @@ public class GamePM extends ImageView {
             this.totalAnimTime = 33.3;
         }
 
-        public void animate(Action.Kind ak, Kind k) {
-            this.aKind = ak;
+        public void animate(Action a, Kind k) {
+            this.a = a;
             this.kind = k;
             this.animTime = totalAnimTime;
         }
 
         @Override
         public void handle(long now) {
-            if(aKind != null && kind != null && animTime >= 0) {
+            if(a != null && kind != null && animTime >= 0) {
                 double percentage = (100 / totalAnimTime) * (totalAnimTime - animTime);
                 if(kind == Kind.DO) {
-                    if(aKind == Action.Kind.ADD) { //ADD + DO
+                    if(a.getKind() == Action.Kind.ADD) { //ADD + DO
                         pm.setOpacity(0.01 * percentage);
                     }
-                    if(aKind == Action.Kind.SWAP) { //SWAP + DO
-
+                    if(a.getKind() == Action.Kind.SWAP) { //SWAP + DO
+                        pm.setScaleX((- 0.02 * percentage) + 1);
+                        if(pm.getScaleX() <= 0.01) {
+                            PieceModel pieceModel = (PieceModel)a.piece;
+                            pm.setImage(new Image("file:Resources/"+pieceModel.getSpecies()+"-"+pieceModel.getColor()+".png"));
+                        }
                     }
                 }
 
@@ -64,3 +68,7 @@ public class GamePM extends ImageView {
 
     }
 }
+/*
+PieceModel pieceModel = (PieceModel)a.piece;
+pm.setImage(new Image("file:Resources/"+pieceModel.getSpecies()+"-"+pieceModel.getColor()+".png"));
+ */
