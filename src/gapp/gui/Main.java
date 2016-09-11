@@ -21,9 +21,10 @@ public class Main extends Application {
     public static Stage thestage;
 
     private Parent welcome() { //Messaggio di inizio, scompare dopo tot tempo
-        Text message = new Text("-MESSAGGIO DI BENVENUTO DA DECIDERE-");
-        message.setStyle("-fx-font: 24 arial;");
+        Text message = new Text("TABLETOP GAMES");
+        message.setStyle("-fx-font: 30 arial");
         VBox vb = new VBox(message); vb.setAlignment(Pos.CENTER);
+        vb.setStyle("-fx-background-color: forestgreen");
         return vb;
     }
 
@@ -34,9 +35,9 @@ public class Main extends Application {
         playGUI = new PlayGUI(board, 10000);
 
         primaryStage.setTitle("Tabletop Games");
-        primaryStage.setScene(new Scene(welcome(), 800, 600)); //Pagina di benvenuto
+        primaryStage.setScene(new Scene(welcome(), 600, 400)); //Pagina di benvenuto
 
-        PauseTransition delay = new PauseTransition(Duration.seconds(1)); //Passaggio a pagina impostazione game (AUMENTARE A 4!)
+        PauseTransition delay = new PauseTransition(Duration.seconds(3)); //Passaggio a pagina impostazione game (AUMENTARE A 4!)
         delay.setOnFinished( event -> SettingUp.setUPmenu() );
         delay.play();
 

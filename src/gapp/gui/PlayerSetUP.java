@@ -27,7 +27,6 @@ public class PlayerSetUP {
             ComboBox cb = new ComboBox(); cb.setPrefWidth(150);
             cb.getItems().addAll(gTypes); cb.setValue("Random Player"); cb.getItems().add("Player");
 
-            //HBox line = new HBox(10, pName, name, cb);
             elems.getChildren().add(new HBox(10, pName, name, cb));
         }
 
@@ -42,9 +41,15 @@ public class PlayerSetUP {
             for(int i = 1; i < elems.getChildren().size(); i++) {
                 if(elems.getChildren().get(i).equals(buttons)) { break; }
                 String name = ((TextField)((HBox)elems.getChildren().get(i)).getChildren().get(1)).getText();
-                String type = (String)((ComboBox)((HBox)elems.getChildren().get(i)).getChildren().get(2)).getValue(); //Troppi Cast, semplificare in seguito
+                String type = (String)((ComboBox)((HBox)elems.getChildren().get(i)).getChildren().get(2)).getValue();
+                if(Objects.equals(name, "")) {
+                    Alert alert = new Alert(Alert.AlertType.WARNING);
+                    alert.setTitle("Warning"); alert.setHeaderText(null); alert.setContentText("Player name not set!");
+                    alert.showAndWait();
+                    break;
+                }
 
-                if(Objects.equals(type, "Player")) { Main.playGUI.setPlayerGUI(i-1, name, GameBoard.humanPlayer()); } //Errore, humanPlayer ancora da scrivere
+                if(Objects.equals(type, "Player")) { Main.playGUI.setPlayerGUI(i-1, name, GameBoard.humanPlayer()); }
                 else { Main.playGUI.setPlayerFactory(i-1, type, name, null); } //Non sono certo del null, potrebbe essere necessario su alcuni tipi di giocatore
             }
             if(!Main.playGUI.enoughPlayers()) {

@@ -12,9 +12,6 @@ import java.util.*;
 import java.util.function.Consumer;
 
 import static gapp.ulg.game.board.Action.Kind.*;
-import static gapp.ulg.game.board.Action.Kind.ADD;
-import static gapp.ulg.game.board.Action.Kind.SWAP;
-
 
 public class GameBoard extends GridPane implements PlayGUI.Observer{
     private static GameBoard sharedBoard = null; //Tavolo da gioco dell'istanza, uno solo per avvio di applicazione
