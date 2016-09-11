@@ -93,8 +93,8 @@ public class PlayGUI<P> {
     private long mbt;
     public GameFactory gF;
     private GameRuler gR;
-    private List<PlayerFactory> pF = new ArrayList<>();
-    private List<Player> pL = new ArrayList<>();
+    public List<PlayerFactory> pF = new ArrayList<>();
+    public List<Player> pL = new ArrayList<>();
 
     /** Crea un oggetto {@link PlayGUI} per partite controllate da GUI. L'oggetto
      * {@code PlayGUI} può essere usato per giocare più partite anche con giochi e
