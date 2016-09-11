@@ -6,7 +6,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 
 public class GameScreen {
     private static GameRuler gR;
@@ -27,8 +27,10 @@ public class GameScreen {
 
         Button exit = new Button("Exit"); exit.setOnAction(e -> Main.thestage.close());
         Button next = new Button("Next"); next.setOnAction(e -> Main.playGUI.execTurn());
-        HBox buttons = new HBox(10, next, exit);
-        gamePane.setBottom(buttons); BorderPane.setAlignment(buttons, Pos.BOTTOM_RIGHT);
+        next.setPrefSize(110, 60); next.setStyle("-fx-font-size: 25; -fx-font-weight: bold");
+        StackPane buttons = new StackPane(); buttons.getChildren().addAll(next, exit);
+        buttons.setPrefSize(800, 100); StackPane.setAlignment(exit, Pos.BOTTOM_RIGHT);
+        gamePane.setBottom(buttons);
 
         Main.thestage.setScene(new Scene(gamePane, 800, 600));
     }

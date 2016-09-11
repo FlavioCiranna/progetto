@@ -1,5 +1,7 @@
 package gapp.ulg.game.util;
 
+import gapp.gui.Main;
+import gapp.gui.SettingUp;
 import gapp.ulg.game.GameFactory;
 import gapp.ulg.game.Param;
 import gapp.ulg.game.PlayerFactory;
@@ -8,6 +10,7 @@ import gapp.ulg.game.board.Move;
 import gapp.ulg.game.board.Player;
 import gapp.ulg.games.GameFactories;
 import gapp.ulg.play.PlayerFactories;
+import javafx.scene.control.Alert;
 
 import static gapp.ulg.game.util.PlayerGUI.MoveChooser;
 
@@ -559,10 +562,27 @@ public class PlayGUI<P> {
 
     public void execTurn() { //Esegue le mosse del player corrente e passa il turno
 
-        ExecutorService nxtThr = Executors.newSingleThreadExecutor(r -> { //Verificare se avviare un thread qui ha senso o è performante
+        ExecutorService nxtThr = Executors.newSingleThreadExecutor(r -> {
             Thread t = new Thread(r);
             t.setDaemon(true);
             return t; });
+
+        if(gR.result() != -1) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);  alert.setHeaderText(null);
+            if(gR.result() != 0) {
+                alert.setTitle("Congratulation!");
+                alert.setContentText("Player "+pL.get(gR.result()-1).name()+" won the game!");
+            }
+            else {
+                alert.setTitle("No Winner!");
+                alert.setContentText("Better luck next time!");
+            }
+            alert.showAndWait();
+
+            gR = null; pL.clear(); obs.interrupted("Fine del game"); //Stop sembra non funzionare
+
+            SettingUp.setUPmenu();
+        }
 
         Move m;
         Future<Move> task = nxtThr.submit(() -> pL.get(gR.turn()-1).getMove()); //Esecuzione della mossa nel nuovo thread
@@ -570,7 +590,7 @@ public class PlayGUI<P> {
         try {
             m = task.get();
             for(Player player : pL) { player.moved(gR.turn(), m); }
-            obs.moved(gR.turn(), m); //Controllare se è necessario un thread ulteriore
+            obs.moved(gR.turn(), m);
             gR.move(m); //Eseguo finalmente la mossa sulla board interna
         }
         catch (InterruptedException | ExecutionException ignored) { }

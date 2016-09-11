@@ -11,6 +11,13 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
+/*
+Il seguente progetto è visibilmente incompleto, ho comunque deciso di procedere
+con la consegna per completezza del percorso formativo del semestre passato. Il
+seguente gioco sfortunatamente non è in grado di usare giocatori umani ed è sprovvisto
+dell'interfaccia per aggiungere nuovi giochi (benchè il sistema funzioni).
+*/
+
 public class Main extends Application {
     public static void main(String[] args) {
         launch(args);
