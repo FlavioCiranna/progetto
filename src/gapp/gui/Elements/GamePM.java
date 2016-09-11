@@ -15,7 +15,7 @@ public class GamePM extends GameElements {
     private Pos pos;
 
     public GamePM(PieceModel pm, Pos p) {
-        super("file:Resources/" + pm.getSpecies() + "-" + pm.getColor() + ".png", p);
+        super("file:resources/" + pm.getSpecies() + "-" + pm.getColor() + ".png", p);
         this.pm = pm;
         this.pos = p;
         animator = new Animator(this);
@@ -56,7 +56,7 @@ public class GamePM extends GameElements {
                         double operation;
                         if (animTime <= totalAnimTime / 2) {
                             PieceModel pieceModel = (PieceModel) a.piece;
-                            pm.setImage(new Image("file:Resources/" + pieceModel.getSpecies() + "-" + pieceModel.getColor() + ".png"));
+                            pm.setImage(new Image("file:resources/" + pieceModel.getSpecies() + "-" + pieceModel.getColor() + ".png"));
                             operation = -0.01 * (1 - percentage); //Evito che i pezzi si rigirino su se stessi
                         } else {
                             operation = (-0.01 * percentage) + 1;
