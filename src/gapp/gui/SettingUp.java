@@ -15,7 +15,7 @@ import java.util.Map;
 
 public class SettingUp {
 
-    public static void setUPmenu(){ //Problema nel cambio di gioco con i parametri, correzione futura
+    public static void setUPmenu(){
         BorderPane setMenu = new BorderPane(); //Layout principale
         Map<String,ComboBox> paramsMap = new HashMap<>(); //Aggiornamento dei combobox nel caso abbiano caratteristiche interlacciate
 

@@ -1,6 +1,5 @@
 package gapp.gui;
 
-import gapp.ulg.game.board.GameRuler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -9,14 +8,10 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 
 public class GameScreen {
-    private static GameRuler gR;
-
     public static void showGame() {
 
         try { Thread.currentThread().join(1000); }
         catch (InterruptedException ignore) { }
-
-        gR = GameBoard.gR;
 
         BorderPane gamePane = new BorderPane();
         gamePane.setPadding(new Insets(12,12,12,12));

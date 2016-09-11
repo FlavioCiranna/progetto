@@ -8,7 +8,7 @@ import javafx.animation.AnimationTimer;
 import javafx.scene.image.Image;
 
 public class GamePM extends GameElements {
-    public enum Kind {DO, END, SHOW, UNSHOW}
+    public enum Kind {DO} //Aggiungerne altri per le animazioni temporanee o rimozioni
 
     private PieceModel pm;
     private Animator animator;
