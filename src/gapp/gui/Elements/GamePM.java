@@ -68,7 +68,3 @@ public class GamePM extends GameElements {
 
     }
 }
-/*
-PieceModel pieceModel = (PieceModel)a.piece;
-pm.setImage(new Image("file:Resources/"+pieceModel.getSpecies()+"-"+pieceModel.getColor()+".png"));
- */

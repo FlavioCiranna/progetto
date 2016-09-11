@@ -77,7 +77,6 @@ public class GameBoard extends GridPane implements PlayGUI.Observer{
                 }
 
                 if(action.getKind() == Action.Kind.SWAP) {
-                    int counter = 0;
                     for(Pos p : (List<Pos>) action.getPos()) {
                         ((GamePM) gameMap.get(p)).animatePiece(action, GamePM.Kind.DO);
                     }
