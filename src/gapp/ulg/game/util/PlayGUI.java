@@ -13,10 +13,7 @@ import static gapp.ulg.game.util.PlayerGUI.MoveChooser;
 
 import java.lang.reflect.Array;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
 
@@ -504,6 +501,8 @@ public class PlayGUI<P> {
     }
 
     public boolean enoughPlayers() { return !(gF.minPlayers() > pL.size() || pL.size() == 0); }
+    public List<Player> getpL() { return Collections.unmodifiableList(pL); }
+    public List<PlayerFactory> getpF() { return Collections.unmodifiableList(pF); }
 
 
     /** Inizia una partita con un gioco fabbricato dalla GameFactory impostata e i

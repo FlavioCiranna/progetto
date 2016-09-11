@@ -1,11 +1,16 @@
 package gapp.gui.Elements;
 
+import gapp.gui.GameBoard;
 import gapp.gui.GameElements;
 import gapp.ulg.game.board.Action;
+import gapp.ulg.game.board.Board;
 import gapp.ulg.game.board.PieceModel;
 import gapp.ulg.game.board.Pos;
 import javafx.animation.AnimationTimer;
 import javafx.scene.image.Image;
+import javafx.util.Pair;
+
+import java.util.List;
 
 public class GamePM extends GameElements {
     public enum Kind { DO, SHOW, UNSHOW }
@@ -33,7 +38,7 @@ public class GamePM extends GameElements {
 
         public Animator(GamePM pm) {
             this.pm = pm;
-            this.totalAnimTime = 33.3;
+            this.totalAnimTime = 20;
         }
 
         public void animate(Action a, Kind k) {
@@ -44,27 +49,49 @@ public class GamePM extends GameElements {
 
         @Override
         public void handle(long now) {
-            if(a != null && kind != null && animTime >= 0) {
-                double percentage = (99.9 / totalAnimTime) * (totalAnimTime - animTime);
-                if(kind == Kind.DO) {
-                    if(a.getKind() == Action.Kind.ADD) { //ADD + DO
+            if (a != null && kind != null && animTime >= 0) {
+                double percentage = (100 / totalAnimTime) * (totalAnimTime - animTime);
+                if (kind == Kind.DO) {
+                    if (a.getKind() == Action.Kind.ADD) { //ADD + DO
                         pm.setOpacity(0.01 * percentage);
                     }
-                    if(a.getKind() == Action.Kind.SWAP) { //SWAP + DO
-                        pm.setScaleX((- 0.02 * percentage) + 1);
-                        if(animTime <= totalAnimTime/2) {
-                            PieceModel pieceModel = (PieceModel)a.piece;
-                            pm.setImage(new Image("file:Resources/"+pieceModel.getSpecies()+"-"+pieceModel.getColor()+".png"));
+                    if (a.getKind() == Action.Kind.SWAP) { //SWAP + DO
+                        double operation;
+                        if (animTime <= totalAnimTime / 2) {
+                            PieceModel pieceModel = (PieceModel) a.piece;
+                            pm.setImage(new Image("file:Resources/" + pieceModel.getSpecies() + "-" + pieceModel.getColor() + ".png"));
+                            operation = -0.01 * (1 - percentage); //Evito che i pezzi si rigirino su se stessi
+                        } else {
+                            operation = (-0.01 * percentage) + 1;
                         }
+                        pm.setScaleY(operation);
                     }
                 }
-
-                if(kind == Kind.SHOW) {}
-
-                animTime -= 1;
+/*
+                if (kind == Kind.SHOW) { //Mi sta cancellando la casella
+                    if (a.kind == Action.Kind.ADD) {
+                        //pm.setScaleX(0.005 * percentage);
+                        //pm.setScaleY(0.005 * percentage);
+                        pm.setOpacity(0.01 * percentage);
+                    } else if (a.kind == Action.Kind.SWAP) {
+                        pm.setScaleX(1 - (0.005 * percentage));
+                    }
+                } else {
+                    if (a.kind == Action.Kind.ADD) {
+                        //pm.setScaleX(0.5 - (0.005 * percentage));
+                        //pm.setScaleY(0.5 - (0.005 * percentage));
+                        pm.setOpacity(1 - (0.01 * percentage));
+                    } else if (a.kind == Action.Kind.SWAP) {
+                        pm.setScaleX(0.5 + (0.005 * percentage));
+                    }*/
+                    animTime -= 1;
+                }
+            }/*
+            else {
+                if (a != null && a.kind == Action.Kind.ADD && kind == Kind.UNSHOW) { GameBoard.removePiece(getPos()); }
+                a = null;
+                kind = null;
             }
-        }
-
-
+        }*/
     }
 }

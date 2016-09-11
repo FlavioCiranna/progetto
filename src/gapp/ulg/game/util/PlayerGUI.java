@@ -2,8 +2,7 @@ package gapp.ulg.game.util;
 
 import gapp.ulg.game.board.*;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Consumer;
 
 /** Un {@code PlayerGUI} rappresenta un giocatore che sceglie le mosse tramite GUI.
@@ -267,6 +266,518 @@ public class PlayerGUI<P> implements Player<P> {
      * thread differente, quello che gestisce la GUI.</b> */
     @Override
     public Move<P> getMove() {
-        throw new UnsupportedOperationException("PROGETTO: DA IMPLEMENTARE");
+        Chooser c = new Chooser(gameRul);
+        master.accept(c);
+
+        try {
+            while (c.finalChoice == null) { Thread.currentThread().sleep(100); }
+        }
+        catch (InterruptedException e) { return null; }
+        catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+
+        return c.finalChoice;
+    }
+
+
+    private class Chooser implements MoveChooser<P> {
+
+        private Node root;
+        private GameRuler<P> gR;
+        private Set<Pos> selection;
+        private Move<P> finalChoice = null;
+
+        public Chooser(GameRuler<P> gr) {
+
+            this.gR = gr;
+
+            selection = new HashSet<>();
+
+            root = createTree(new Node(null), gr.validMoves());
+        }
+
+        private Node createTree(Node node, Set<Move<P>> moves)
+        {
+            Map<Move<P>, Set<Move<P>>> movesMap = new HashMap<>();
+
+            for (Move<P> move: moves)
+            {
+                if (move.kind == Move.Kind.ACTION)
+                {
+                    if (node.prefix == null && movesMap.size() == 0)
+                    {
+                        node.prefix = move;
+                    }
+                    else if (node.prefix != null && movesMap.size() == 0)
+                    {
+                        if (node.prefix.actions.get(0).equals(move.actions.get(0)))
+                        {
+                            Move<P> newPref;
+                            int count = 0;
+
+                            for (int i = 0; i < Math.min(node.prefix.actions.size(), move.actions.size()); i++)
+                            {
+                                if (node.prefix.actions.get(i).equals(move.actions.get(i)))
+                                {
+                                    count++;
+                                }
+                            }
+                            newPref = new Move<>(node.prefix.actions.subList(0, count));
+
+                            movesMap.put(newPref, new HashSet<>());
+                            movesMap.get(newPref).add(new Move(move.actions.subList(count, move.actions.size())));
+                            movesMap.get(newPref).add(new Move(node.prefix.actions.subList(count, node.prefix.actions.size())));
+
+                            node.prefix = newPref;
+                        }
+                        else
+                        {
+                            movesMap.put(node.prefix, new HashSet<>());
+                            movesMap.get(node.prefix).add(node.prefix);
+                            movesMap.put(move, new HashSet<>());
+                            movesMap.get(move).add(move);
+                            node.prefix = null;
+                        }
+                    }
+                    else if (node.prefix != null && movesMap.size() > 0)
+                    {
+                        Move<P> newPref;
+                        int count = 0;
+
+                        for (int i = 0; i < Math.min(node.prefix.actions.size(), move.actions.size()); i++)
+                        {
+                            if (node.prefix.actions.get(i).equals(move.actions.get(i)))
+                            {
+                                count++;
+                            }
+                        }
+                        newPref = new Move<>(node.prefix.actions.subList(0, count));
+
+                        if (newPref.equals(node.prefix))
+                        {
+                            movesMap.get(node.prefix).add(new Move<>(move.actions.subList(count, move.actions.size())));
+                        }
+                        else
+                        {
+                            if (!movesMap.containsKey(newPref))
+                            {
+                                movesMap.put(newPref, new HashSet<>());
+                            }
+                            movesMap.get(newPref).add(new Move(move.actions.subList(count, move.actions.size())));
+                            movesMap.get(newPref).add(new Move(node.prefix.actions.subList(count, node.prefix.actions.size())));
+
+                            node.prefix = newPref;
+                        }
+                    }
+                    else if (node.prefix == null && movesMap.size() > 0)
+                    {
+                        movesMap.put(move, new HashSet<>());
+                        movesMap.get(move).add(move);
+                    }
+                }
+            }
+
+            if (node.parent != null && node.parent.prefix != null)
+            {
+                List<Action<P>> actions = new ArrayList<>();
+
+                for (Action<P> action: node.prefix.actions)
+                {
+                    if (!node.parent.prefix.actions.contains(action))
+                    {
+                        actions.add(action);
+                    }
+                }
+                node.subMove = new Move<>(actions);
+            }
+            else if (node.parent != null && node.parent.prefix == null)
+            {
+                node.subMove = new Move<>(node.prefix.actions);
+            }
+
+            for (Move<P> move: movesMap.keySet())
+            {
+                node.children.add(createTree(new Node(node), movesMap.get(move)));
+            }
+            return node;
+        }
+
+
+        @Override
+        public Optional<Move<P>> subMove()
+        {
+            if (finalChoice != null) throw new IllegalStateException();
+
+            if (root == null)
+            {
+                return null;
+            }
+            else if (root.subMove == null)
+            {
+                return Optional.empty();
+            }
+            else
+            {
+                return Optional.of(root.subMove);
+            }
+        }
+
+        @Override
+        public List<Move<P>> childrenSubMoves()
+        {
+            if (finalChoice != null) throw new IllegalStateException();
+
+            if (root == null)
+            {
+                return null;
+            }
+
+            List<Move<P>> childrenSubMoves = new ArrayList<>();
+
+            for (Node node: root.children)
+            {
+                if (node.subMove != null)
+                {
+                    childrenSubMoves.add(node.subMove);
+                }
+            }
+            return childrenSubMoves;
+        }
+
+        @Override
+        public List<Move<P>> select(Pos... pp)
+        {
+            if (finalChoice != null) throw new IllegalStateException();
+            if (pp.length == 0) throw new IllegalArgumentException();
+
+            clearSelection();
+
+            for (Pos pos: pp)
+            {
+                Objects.requireNonNull(pos);
+
+                if (!gR.getBoard().isPos(pos) || selection.contains(pos)) throw new IllegalArgumentException();
+
+                selection.add(pos);
+            }
+
+            if (root == null)
+            {
+                return null;
+            }
+
+            List<Move<P>> selected = new ArrayList<>();
+
+            for (Node node: root.children)
+            {
+                Action action = node.subMove.actions.get(0);
+
+                if (selection.contains(action.pos.get(0)))
+                {
+                    selected.add(node.subMove);
+                }
+            }
+            return selected;
+        }
+
+        @Override
+        public List<Move<P>> quasiSelected()
+        {
+            if (finalChoice != null) throw new IllegalStateException();
+
+            if (root == null)
+            {
+                return null;
+            }
+
+            List<Move<P>> subMoves = childrenSubMoves();
+            List<Move<P>> quasiSelected = new ArrayList<>();
+
+            for (Move<P> move: subMoves)
+            {
+                for (Pos pos: move.actions.get(0).pos)
+                {
+                    if (selection.contains(pos))
+                    {
+                        quasiSelected.add(move);
+                        break;
+                    }
+                }
+            }
+            return quasiSelected;
+        }
+
+        @Override
+        public List<P> selectionPieces()
+        {
+            if (finalChoice != null) throw new IllegalStateException();
+
+            if (root == null)
+            {
+                return null;
+            }
+
+            List<P> pieces = new ArrayList<>();
+            List<Move<P>> quasiSelected = quasiSelected();
+
+            if (quasiSelected.size() == 1 && quasiSelected.get(0).actions.get(0).kind == Action.Kind.REMOVE)
+            {
+                pieces.add(null);
+                return pieces;
+            }
+
+            Action.Kind found = null;
+
+            for (Move<P> move: quasiSelected())
+            {
+                if (found == null && (move.actions.get(0).kind == Action.Kind.ADD || move.actions.get(0).kind == Action.Kind.SWAP))
+                {
+                    found = move.actions.get(0).kind;
+                    pieces.add(move.actions.get(0).piece);
+                }
+                if (found == move.actions.get(0).kind)
+                {
+                    pieces.add(move.actions.get(0).piece);
+                }
+                else
+                {
+                    pieces.clear();
+                    return pieces;
+                }
+            }
+            return pieces;
+        }
+
+        @Override
+        public void clearSelection()
+        {
+            if (finalChoice != null) throw new IllegalStateException();
+
+            selection.clear();
+        }
+
+        @Override
+        public Move<P> doSelection(P pm)
+        {
+            if (finalChoice != null) throw new IllegalStateException();
+
+            List<Move<P>> quasiSelected = quasiSelected();
+            List<P> pieces = new ArrayList<>();
+
+            if (quasiSelected.size() == 1 && quasiSelected.get(0).actions.get(0).kind == Action.Kind.REMOVE)
+            {
+                for (Node node: root.children)
+                {
+                    if (node.subMove == quasiSelected.get(0))
+                    {
+                        root = node;
+                        selection.clear();
+                        return root.subMove;
+                    }
+                }
+            }
+
+            Action.Kind found = null;
+
+            for (Move<P> move: quasiSelected())
+            {
+                if (found == null && (move.actions.get(0).kind == Action.Kind.ADD || move.actions.get(0).kind == Action.Kind.SWAP))
+                {
+                    found = move.actions.get(0).kind;
+                    pieces.add(move.actions.get(0).piece);
+                }
+                if (found == move.actions.get(0).kind)
+                {
+                    pieces.add(move.actions.get(0).piece);
+                }
+                else
+                {
+                    return null;
+                }
+            }
+
+            if (pieces.contains(pm))
+            {
+                for (Node node: root.children)
+                {
+                    if (node.subMove.equals(quasiSelected.get(pieces.indexOf(pm))))
+                    {
+                        root = node;
+                        selection.clear();
+                        return root.subMove;
+                    }
+                }
+            }
+            return null;
+        }
+
+        @Override
+        public Move<P> jumpSelection(Pos p)
+        {
+            if (finalChoice != null) throw new IllegalStateException();
+
+            List<Move<P>> quasiSelected = quasiSelected();
+
+            for (Node node: root.children)
+            {
+                for (Move<P> move: quasiSelected)
+                {
+                    if (node.subMove.equals(move) &&
+                            move.actions.get(0).kind == Action.Kind.JUMP &&
+                            move.actions.get(0).pos.get(1).equals(p))
+                    {
+                        root = node;
+                        selection.clear();
+                        return root.subMove;
+                    }
+                }
+            }
+            return null;
+        }
+
+        @Override
+        public Move<P> moveSelection(Board.Dir d, int ns)
+        {
+            if (finalChoice != null) throw new IllegalStateException();
+
+            List<Move<P>> quasiSelected = quasiSelected();
+
+            for (Node node: root.children)
+            {
+                for (Move<P> move: quasiSelected)
+                {
+                    if (node.subMove.equals(move) &&
+                            move.actions.get(0).kind == Action.Kind.MOVE &&
+                            move.actions.get(0).dir == d &&
+                            move.actions.get(0).steps == ns)
+                    {
+                        root = node;
+                        selection.clear();
+                        return root.subMove;
+                    }
+                }
+            }
+            return null;
+        }
+
+        @Override
+        public Move<P> back()
+        {
+            if (finalChoice != null) throw new IllegalStateException();
+
+            if (root == null || root.parent == null)
+            {
+                return null;
+            }
+
+            List<Action<P>> actions = new ArrayList<>();
+
+            for (Action action: root.parent.subMove.actions)
+            {
+                Action<P> inverseAction = null;
+                if (action.kind == Action.Kind.REMOVE)
+                {
+                    for (Pos p: (List<Pos>)action.pos)
+                    {
+                        inverseAction = new Action(p, gR.getBoard().get(p));
+                        actions.add(inverseAction);
+                    }
+                }
+                else if (action.kind == Action.Kind.ADD)
+                {
+                    inverseAction = new Action(action.pos.get(0));
+                    actions.add(inverseAction);
+                }
+                else if (action.kind == Action.Kind.JUMP)
+                {
+                    inverseAction = new Action((Pos)action.pos.get(1), (Pos)action.pos.get(0));
+                    actions.add(inverseAction);
+                }
+                else if (action.kind == Action.Kind.MOVE)
+                {
+                    List<Pos> positions = new ArrayList<>();
+                    for (Pos p: (List<Pos>)action.pos)
+                    {
+                        Pos newPos = null;
+                        for (int i = 0; i < action.steps; i++)
+                        {
+                            newPos = gR.getBoard().adjacent(p, Utils.opposite(action.dir));
+                        }
+                        positions.add(newPos);
+                    }
+                    inverseAction = new Action(Utils.opposite(action.dir), action.steps, (Pos[])positions.toArray());
+                    actions.add(inverseAction);
+                }
+                else
+                {
+                    inverseAction = new Action(gR.mechanics().pieces.get(2 - (1 + gR.mechanics().pieces.indexOf(action.piece))), (Pos[])action.pos.toArray());
+                }
+                actions.add(inverseAction);
+            }
+            return new Move<>(actions);
+        }
+
+        @Override
+        public boolean isFinal()
+        {
+            if (finalChoice != null) throw new IllegalStateException();
+
+            if (root == null || root.children.size() > 0)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        @Override
+        public void move()
+        {
+            if (finalChoice != null || !isFinal()) throw new IllegalStateException();
+
+            finalChoice = root.prefix;
+        }
+
+        @Override
+        public boolean mayPass()
+        {
+            if (finalChoice != null) throw new IllegalStateException();
+
+            return gR.isValid(new Move<>(Move.Kind.PASS));
+        }
+
+        @Override
+        public void pass()
+        {
+            if (finalChoice != null || !mayPass()) throw new IllegalStateException();
+
+            finalChoice = new Move<>(Move.Kind.PASS);
+        }
+
+        @Override
+        public void resign()
+        {
+            if (finalChoice != null) throw new IllegalStateException();
+
+            finalChoice = new Move<>(Move.Kind.RESIGN);
+        }
+
+
+        private class Node
+        {
+            private Node parent;
+            private Move<P> prefix;
+            private Move<P> subMove;
+            private List<Node> children;
+
+            public Node(Node parent)
+            {
+                this.parent = parent;
+
+                children = new ArrayList<>();
+            }
+        }
     }
 }

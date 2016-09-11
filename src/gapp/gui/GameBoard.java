@@ -19,7 +19,7 @@ public class GameBoard extends GridPane implements PlayGUI.Observer{
 
     private static final int bCells = 30;
     private static Map<Pos, GameElements> gameMap; //Per poter effettivamente sostituire o eliminare i pezzi
-    private static GameRuler gR;
+    public static GameRuler gR;
     private static String vMsg;
 
     public GameBoard() { super(); }
@@ -95,9 +95,11 @@ public class GameBoard extends GridPane implements PlayGUI.Observer{
     }
 
     @Override
-    public void interrupted(String msg) { //Indagare sull'utilizzo futuro
+    public void interrupted(String msg) { //Inserire finestra di messaggio
         vMsg = msg;
     }
 
     public static Consumer<PlayerGUI.MoveChooser> humanPlayer() { return null; } //Temporaneo
+
+    public static void removePiece(Pos pos) { getSharedBoard().getChildren().remove(gameMap.get(pos)); }
 }
